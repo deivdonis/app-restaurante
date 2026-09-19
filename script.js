@@ -8,6 +8,8 @@ const cartaModal = document.getElementById('cartaModal');
 const closeBtn = document.querySelector('.close');
 const statusMessage = document.getElementById('statusMessage');
 const mesaNumber = document.getElementById('mesaNumber');
+const navCarta = document.getElementById('navCarta');
+const navItems = document.querySelectorAll('.nav-item');
 
 // Speech Recognition Setup
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -30,6 +32,15 @@ closeBtn.addEventListener('click', closeCarta);
 window.addEventListener('click', (e) => {
     if (e.target === cartaModal) closeCarta();
 });
+
+// Navigation events
+if (navCarta) {
+    navCarta.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCarta();
+        updateActiveNav('navCarta');
+    });
+}
 
 // Functions
 function openCarta() {
@@ -142,9 +153,21 @@ function getMesa() {
     }
 }
 
+// Update active navigation
+function updateActiveNav(id) {
+    if (navItems) {
+        navItems.forEach(item => item.classList.remove('active'));
+        const activeItem = document.getElementById(id);
+        if (activeItem) {
+            activeItem.classList.add('active');
+        }
+    }
+}
+
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
     getMesa();
+    updateActiveNav('navHome');
 
     // Permitir cambiar número de mesa con doble click
     mesaNumber.addEventListener('dblclick', () => {

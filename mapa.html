@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Mesas - App Restaurante</title>
+    <link rel="stylesheet" href="styles-mapa.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mapa de Mesas</h1>
+            <p class="subtitle">Selecciona tu mesa</p>
+        </div>
+
+        <div class="mesas-grid" id="mesasGrid">
+            <!-- Las mesas se generarán con JavaScript -->
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="mapa.html" class="nav-item active" id="navMapa">
+            <span class="nav-icon">🗺️</span>
+            <span class="nav-label">Mapa</span>
+        </a>
+
+        <a href="#" class="nav-item" id="navCarta">
+            <span class="nav-icon">📋</span>
+            <span class="nav-label">Carta</span>
+        </a>
+
+        <a href="index.html" class="nav-item" id="navHome">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Inicio</span>
+        </a>
+
+        <a href="#" class="nav-item" id="navPerfil">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Perfil</span>
+        </a>
+
+        <a href="#" class="nav-item" id="navOpciones">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Opciones</span>
+        </a>
+    </nav>
+
+    <!-- Modal para cartón -->
+    <div id="cartaModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Carta del Restaurante</h2>
+            <div class="menu-section">
+                <h3>Platos Principales</h3>
+                <ul>
+                    <li>Filete a la Pimienta - €18.99</li>
+                    <li>Salmón a la Mantequilla - €16.99</li>
+                    <li>Pechuga de Pollo Rellena - €14.99</li>
+                </ul>
+            </div>
+            <div class="menu-section">
+                <h3>Entrantes</h3>
+                <ul>
+                    <li>Tabla de Quesos y Jamón - €12.99</li>
+                    <li>Camarones al Ajillo - €10.99</li>
+                    <li>Tabla de Embutidos - €9.99</li>
+                </ul>
+            </div>
+            <div class="menu-section">
+                <h3>Bebidas</h3>
+                <ul>
+                    <li>Vino Tinto - €8.99</li>
+                    <li>Vino Blanco - €7.99</li>
+                    <li>Agua - €2.99</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script-mapa.js"></script>
+</body>
+</html>
