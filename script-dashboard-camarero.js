@@ -14,28 +14,17 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 const closeButtons = document.querySelectorAll('.close');
 
 // Estado
-let camareroActual = '';
+let camareroActual = 'camarero1';
 let filtroActual = 'all';
 let mesaTrasladoActual = null;
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
-    // Verificar autenticación
-    const isAuthenticated = sessionStorage.getItem('staff_authenticated') === 'true';
-    camareroActual = sessionStorage.getItem('staff_user');
-    const nombreStaff = sessionStorage.getItem('staff_name');
+    console.log('Dashboard Camarero Cargado');
 
-    console.log('Dashboard Camarero - Verificando autenticación');
-    console.log('Autenticado:', isAuthenticated);
-    console.log('Usuario:', camareroActual);
-
-    if (!isAuthenticated || !camareroActual) {
-        console.log('No autenticado, redirigiendo a login');
-        window.location.href = './login-camareros.html';
-        return;
-    }
-
-    camareroNombre.textContent = nombreStaff;
+    // Sin autenticación - acceso directo
+    camareroActual = 'camarero1';
+    camareroNombre.textContent = 'Dashboard Camarero';
 
     // Event Listeners
     logoutBtn.addEventListener('click', logout);
@@ -275,10 +264,10 @@ function mostrarNotificacion(mensaje) {
 }
 
 function logout() {
-    console.log('Cerrando sesión');
+    console.log('Logout - Limpiando sesión');
     sessionStorage.clear();
     localStorage.removeItem('staff_user');
-    window.location.href = './login-camareros.html';
+    window.location.href = 'login-camareros.html';
 }
 
 // Estilos de animación
