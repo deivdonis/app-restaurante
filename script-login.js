@@ -28,6 +28,8 @@ function handleLogin(e) {
     const usuario = usuarioInput.value.trim();
     const password = passwordInput.value;
 
+    console.log('Intentando login:', usuario, password);
+
     // Validar campos
     if (!usuario || !password) {
         showError('Por favor completa todos los campos');
@@ -35,15 +37,15 @@ function handleLogin(e) {
     }
 
     // Verificar credenciales
-    if (VALID_USERS[usuario] && VALID_USERS[usuario].password === password) {
-        const userRole = VALID_USERS[usuario].role;
-        const userName = VALID_USERS[usuario].nombre;
+    const user = VALID_USERS[usuario];
 
-        // Login exitoso
-        authenticateUser(usuario, userRole);
-        showSuccess('¡Bienvenido! Redirigiendo...');
+    if (user && user.password === password) {
+        const userRole = user.role;
+        const userName = user.nombre;
 
-        // Guardar sesión
+        console.log('Login exitoso:', usuario, 'Rol:', userRole);
+
+        // Guardar sesión PRIMERO
         if (rememberCheckbox.checked) {
             localStorage.setItem('staff_user', usuario);
         }
@@ -53,33 +55,37 @@ function handleLogin(e) {
         sessionStorage.setItem('staff_role', userRole);
         sessionStorage.setItem('staff_name', userName);
 
-        // Redirigir según rol
+        showSuccess('✅ ¡Bienvenido!');
+
+        // Determinar URL según rol
+        let redirectUrl = 'login-camareros.html';
+
+        if (userRole === 'camarero') {
+            redirectUrl = 'dashboard-camarero.html';
+        } else if (userRole === 'gerente') {
+            redirectUrl = 'dashboard-gerente.html';
+        } else if (userRole === 'dueno') {
+            redirectUrl = 'dashboard-dueno.html';
+        }
+
+        console.log('Redirigiendo a:', redirectUrl);
+
+        // Redirigir INMEDIATAMENTE
         setTimeout(() => {
-            if (userRole === 'camarero') {
-                window.location.href = 'dashboard-camarero.html';
-            } else if (userRole === 'gerente') {
-                window.location.href = 'dashboard-gerente.html';
-            } else if (userRole === 'dueno') {
-                window.location.href = 'dashboard-dueno.html';
-            }
-        }, 1500);
+            window.location.href = redirectUrl;
+        }, 300);
+
     } else {
+        console.log('Credenciales inválidas');
         showError('Usuario o contraseña incorrectos');
         passwordInput.value = '';
     }
 }
 
-function authenticateUser(usuario, role) {
-    console.log('✅ Usuario autenticado:', usuario, 'Rol:', role);
-}
-
-function isAuthenticated() {
-    return sessionStorage.getItem('staff_authenticated') === 'true';
-}
-
 function showError(message) {
     loginMessage.textContent = '❌ ' + message;
     loginMessage.className = 'login-message error';
+    console.log('Error:', message);
 
     setTimeout(() => {
         loginMessage.textContent = '';
@@ -88,19 +94,21 @@ function showError(message) {
 }
 
 function showSuccess(message) {
-    loginMessage.textContent = '✅ ' + message;
+    loginMessage.textContent = message;
     loginMessage.className = 'login-message success';
+    console.log('Éxito:', message);
 }
 
 function togglePasswordVisibility() {
     const isPassword = passwordInput.type === 'password';
-
     passwordInput.type = isPassword ? 'text' : 'password';
     togglePasswordBtn.textContent = isPassword ? '🙈' : '👁️';
 }
 
 // Auto-fill recordarme
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Cargado - Login');
+
     const savedUser = localStorage.getItem('staff_user');
     if (savedUser) {
         usuarioInput.value = savedUser;
@@ -109,15 +117,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Redirigir si ya está autenticado
-    if (isAuthenticated()) {
+    const isAuthenticated = sessionStorage.getItem('staff_authenticated') === 'true';
+    if (isAuthenticated) {
         const role = sessionStorage.getItem('staff_role');
+        console.log('Ya autenticado con rol:', role);
+
+        let redirectUrl = 'login-camareros.html';
         if (role === 'camarero') {
-            window.location.href = 'dashboard-camarero.html';
+            redirectUrl = 'dashboard-camarero.html';
         } else if (role === 'gerente') {
-            window.location.href = 'dashboard-gerente.html';
+            redirectUrl = 'dashboard-gerente.html';
         } else if (role === 'dueno') {
-            window.location.href = 'dashboard-dueno.html';
+            redirectUrl = 'dashboard-dueno.html';
         }
+
+        window.location.href = redirectUrl;
     }
 });
 

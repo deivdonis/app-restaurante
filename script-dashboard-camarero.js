@@ -25,8 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
     camareroActual = sessionStorage.getItem('staff_user');
     const nombreStaff = sessionStorage.getItem('staff_name');
 
+    console.log('Dashboard Camarero - Verificando autenticación');
+    console.log('Autenticado:', isAuthenticated);
+    console.log('Usuario:', camareroActual);
+
     if (!isAuthenticated || !camareroActual) {
-        window.location.href = 'login-camareros.html';
+        console.log('No autenticado, redirigiendo a login');
+        window.location.href = './login-camareros.html';
         return;
     }
 
@@ -270,11 +275,10 @@ function mostrarNotificacion(mensaje) {
 }
 
 function logout() {
-    sessionStorage.removeItem('staff_authenticated');
-    sessionStorage.removeItem('staff_user');
-    sessionStorage.removeItem('staff_role');
-    sessionStorage.removeItem('staff_name');
-    window.location.href = 'login-camareros.html';
+    console.log('Cerrando sesión');
+    sessionStorage.clear();
+    localStorage.removeItem('staff_user');
+    window.location.href = './login-camareros.html';
 }
 
 // Estilos de animación

@@ -31,17 +31,33 @@
     </div>
 
     <script>
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            sessionStorage.clear();
-            window.location.href = 'login-camareros.html';
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Dashboard Gerente Cargado');
+
+            // Verificar autenticación
+            const isAuth = sessionStorage.getItem('staff_authenticated') === 'true';
+            const role = sessionStorage.getItem('staff_role');
+            const name = sessionStorage.getItem('staff_name');
+
+            console.log('Autenticado:', isAuth, 'Rol:', role, 'Nombre:', name);
+
+            if (!isAuth || role !== 'gerente') {
+                console.log('No autorizado, redirigiendo a login');
+                window.location.href = './login-camareros.html';
+                return;
+            }
+
+            if (name) {
+                document.getElementById('camareroNombre').textContent = name;
+            }
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                console.log('Logout');
+                sessionStorage.clear();
+                localStorage.removeItem('staff_user');
+                window.location.href = './login-camareros.html';
+            });
         });
-
-        // Verificar autenticación
-        if (sessionStorage.getItem('staff_role') !== 'gerente') {
-            window.location.href = 'login-camareros.html';
-        }
-
-        document.getElementById('camareroNombre').textContent = sessionStorage.getItem('staff_name');
     </script>
 </body>
 </html>
