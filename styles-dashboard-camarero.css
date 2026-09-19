@@ -1,0 +1,452 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    min-height: 100vh;
+    color: #fff;
+}
+
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+    padding: 25px 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    border: 1px solid #444;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.header-left h1 {
+    font-size: 32px;
+    color: #ff8c42;
+    margin-bottom: 10px;
+}
+
+.user-info {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.user-info strong {
+    color: #ff8c42;
+}
+
+.logout-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+}
+
+/* Main Content */
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 25px;
+}
+
+/* Sections */
+.mesas-section,
+.messages-section {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid #444;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #444;
+}
+
+.section-header h2 {
+    font-size: 22px;
+    color: #ff8c42;
+}
+
+/* Filter Buttons */
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-btn {
+    background: rgba(255, 140, 66, 0.1);
+    border: 1px solid rgba(255, 140, 66, 0.3);
+    color: #aaa;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: rgba(255, 140, 66, 0.3);
+    color: #ff8c42;
+    border-color: #ff8c42;
+}
+
+.clear-btn {
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid rgba(255, 107, 107, 0.5);
+    color: #ff6b6b;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+    background: rgba(255, 107, 107, 0.3);
+}
+
+/* Mesas Grid */
+.mesas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+.mesa-card {
+    background: rgba(60, 60, 60, 0.8);
+    border: 2px solid #444;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.mesa-card:hover {
+    border-color: #ff8c42;
+    background: rgba(70, 70, 70, 0.9);
+    box-shadow: 0 8px 20px rgba(255, 140, 66, 0.2);
+}
+
+.mesa-card.inactive {
+    opacity: 0.6;
+}
+
+.mesa-numero {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ff8c42;
+    margin-bottom: 8px;
+}
+
+.mesa-estado {
+    font-size: 11px;
+    background: #4caf50;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.mesa-estado.inactive {
+    background: #ff6b6b;
+}
+
+.mesa-camarero {
+    font-size: 11px;
+    color: #aaa;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+}
+
+.mesa-acciones {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.mesa-btn {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #555;
+    background: rgba(100, 100, 100, 0.3);
+    color: #aaa;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mesa-btn:hover {
+    background: rgba(255, 140, 66, 0.2);
+    border-color: #ff8c42;
+    color: #ff8c42;
+}
+
+.mesa-btn.trasladar:hover {
+    background: rgba(33, 150, 243, 0.2);
+    border-color: #2196f3;
+    color: #2196f3;
+}
+
+/* Messages Section */
+.messages-section {
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    max-height: 600px;
+}
+
+.messages-list {
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.messages-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-list::-webkit-scrollbar-track {
+    background: rgba(100, 100, 100, 0.1);
+    border-radius: 10px;
+}
+
+.messages-list::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+}
+
+.messages-list::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+.no-messages {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    padding: 30px 10px;
+}
+
+.message-item {
+    background: rgba(60, 60, 60, 0.8);
+    border-left: 3px solid #ff8c42;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.message-item.unread {
+    background: rgba(255, 140, 66, 0.1);
+}
+
+.message-mesa {
+    font-weight: 700;
+    color: #ff8c42;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.message-texto {
+    color: #aaa;
+    word-wrap: break-word;
+    margin-bottom: 5px;
+}
+
+.message-time {
+    font-size: 10px;
+    color: #666;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    color: #fff;
+    border: 1px solid #444;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+}
+
+.modal-content h2 {
+    color: #ff8c42;
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    color: #aaa;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #fff;
+}
+
+/* Camareros List */
+.camareros-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.camarero-option {
+    background: rgba(60, 60, 60, 0.8);
+    border: 2px solid #444;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.camarero-option:hover {
+    border-color: #ff8c42;
+    background: rgba(70, 70, 70, 0.9);
+}
+
+/* Detalles Info */
+.detalles-info {
+    background: rgba(60, 60, 60, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.detalles-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #444;
+}
+
+.detalles-item:last-child {
+    border-bottom: none;
+}
+
+.detalles-label {
+    color: #aaa;
+    font-weight: 600;
+}
+
+.detalles-valor {
+    color: #ff8c42;
+    font-weight: 700;
+}
+
+/* Botones Modal */
+.btn-cancel {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #666 0%, #555 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: linear-gradient(135deg, #777 0%, #666 100%);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-content {
+        grid-template-columns: 1fr;
+    }
+
+    .mesas-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    .messages-section {
+        max-height: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .header-left h1 {
+        font-size: 24px;
+    }
+
+    .mesas-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .filter-buttons {
+        width: 100%;
+    }
+
+    .filter-btn {
+        flex: 1;
+    }
+}

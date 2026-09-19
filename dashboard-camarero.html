@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Camarero - App Restaurante</title>
+    <link rel="stylesheet" href="styles-dashboard-camarero.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-left">
+                <h1>🏪 Control de Mesas</h1>
+                <p class="user-info">👨‍💼 <strong id="camareroNombre">Camarero</strong></p>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="dashboard-content">
+            <!-- Mapa de Mesas -->
+            <div class="mesas-section">
+                <div class="section-header">
+                    <h2>📋 Mapa de Mesas</h2>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">Todas</button>
+                        <button class="filter-btn" data-filter="active">Activas</button>
+                        <button class="filter-btn" data-filter="inactive">Inactivas</button>
+                    </div>
+                </div>
+
+                <div class="mesas-grid" id="mesasGrid">
+                    <!-- Las mesas se generarán con JavaScript -->
+                </div>
+            </div>
+
+            <!-- Panel de Mensajes -->
+            <div class="messages-section">
+                <div class="section-header">
+                    <h2>📬 Mensajes de Clientes</h2>
+                    <button class="clear-btn" id="clearMessagesBtn">Limpiar</button>
+                </div>
+
+                <div class="messages-list" id="messagesList">
+                    <p class="no-messages">No hay mensajes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Trasladar Mesa -->
+    <div id="trasladarModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Trasladar Mesa</h2>
+            <p>Selecciona un camarero para trasladar la mesa <strong id="mesaTrasladar">00</strong></p>
+            <div class="camareros-list" id="camarerosList"></div>
+            <button class="btn-cancel" onclick="cerrarTrasladar()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal Detalles Mesa -->
+    <div id="detallesModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Detalles de Mesa</h2>
+            <div class="detalles-info" id="detallesInfo"></div>
+            <button class="btn-cancel" onclick="cerrarDetalles()">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="script-dashboard-camarero.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Gerente - App Restaurante</title>
+    <link rel="stylesheet" href="styles-dashboard-camarero.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div class="header-left">
+                <h1>📊 Dashboard Gerente</h1>
+                <p class="user-info">👔 <strong id="camareroNombre">Gerente</strong></p>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+        </div>
+
+        <div class="dashboard-content" style="grid-template-columns: 1fr;">
+            <div class="mesas-section">
+                <h2>Funcionalidades del Gerente</h2>
+                <p style="color: #aaa; margin-top: 20px;">
+                    ✅ Ver reportes de mesas<br>
+                    ✅ Supervisar camareros<br>
+                    ✅ Gestionar horarios<br>
+                    ✅ Ver estadísticas<br>
+                    <em style="color: #666; margin-top: 20px; display: block;">Próximamente...</em>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            sessionStorage.clear();
+            window.location.href = 'login-camareros.html';
+        });
+
+        // Verificar autenticación
+        if (sessionStorage.getItem('staff_role') !== 'gerente') {
+            window.location.href = 'login-camareros.html';
+        }
+
+        document.getElementById('camareroNombre').textContent = sessionStorage.getItem('staff_name');
+    </script>
+</body>
+</html>

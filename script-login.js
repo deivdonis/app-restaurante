@@ -1,8 +1,12 @@
-// Usuarios válidos (en una app real, esto vendría de una base de datos)
+// Usuarios con roles
 const VALID_USERS = {
-    'camarero': '1234',
-    'admin': 'admin123',
-    'jefe': 'jefe2024'
+    'camarero1': { password: '1234', role: 'camarero', nombre: 'Camarero 1' },
+    'camarero2': { password: '1234', role: 'camarero', nombre: 'Camarero 2' },
+    'camarero3': { password: '1234', role: 'camarero', nombre: 'Camarero 3' },
+    'camarero4': { password: '1234', role: 'camarero', nombre: 'Camarero 4' },
+    'camarero5': { password: '1234', role: 'camarero', nombre: 'Camarero 5' },
+    'gerente': { password: 'gerente123', role: 'gerente', nombre: 'Gerente' },
+    'dueno': { password: 'dueno123', role: 'dueno', nombre: 'Dueño' }
 };
 
 // DOM Elements
@@ -12,23 +16,10 @@ const passwordInput = document.getElementById('password');
 const togglePasswordBtn = document.getElementById('togglePassword');
 const rememberCheckbox = document.getElementById('remember');
 const loginMessage = document.getElementById('loginMessage');
-const navCarta = document.getElementById('navCarta');
 
 // Event Listeners
 loginForm.addEventListener('submit', handleLogin);
 togglePasswordBtn.addEventListener('click', togglePasswordVisibility);
-
-if (navCarta) {
-    navCarta.addEventListener('click', (e) => {
-        e.preventDefault();
-        // Mostrar carta si está autenticado
-        if (isAuthenticated()) {
-            alert('Funcionalidad en desarrollo');
-        } else {
-            showError('Debes iniciar sesión primero');
-        }
-    });
-}
 
 // Login Handler
 function handleLogin(e) {
@@ -44,22 +35,33 @@ function handleLogin(e) {
     }
 
     // Verificar credenciales
-    if (VALID_USERS[usuario] === password) {
+    if (VALID_USERS[usuario] && VALID_USERS[usuario].password === password) {
+        const userRole = VALID_USERS[usuario].role;
+        const userName = VALID_USERS[usuario].nombre;
+
         // Login exitoso
-        authenticateUser(usuario);
+        authenticateUser(usuario, userRole);
         showSuccess('¡Bienvenido! Redirigiendo...');
 
         // Guardar sesión
         if (rememberCheckbox.checked) {
-            localStorage.setItem('camarero_user', usuario);
+            localStorage.setItem('staff_user', usuario);
         }
 
-        sessionStorage.setItem('camarero_authenticated', 'true');
-        sessionStorage.setItem('camarero_user', usuario);
+        sessionStorage.setItem('staff_authenticated', 'true');
+        sessionStorage.setItem('staff_user', usuario);
+        sessionStorage.setItem('staff_role', userRole);
+        sessionStorage.setItem('staff_name', userName);
 
-        // Redirigir a mapa después de 1.5 segundos
+        // Redirigir según rol
         setTimeout(() => {
-            window.location.href = 'mapa.html';
+            if (userRole === 'camarero') {
+                window.location.href = 'dashboard-camarero.html';
+            } else if (userRole === 'gerente') {
+                window.location.href = 'dashboard-gerente.html';
+            } else if (userRole === 'dueno') {
+                window.location.href = 'dashboard-dueno.html';
+            }
         }, 1500);
     } else {
         showError('Usuario o contraseña incorrectos');
@@ -67,12 +69,12 @@ function handleLogin(e) {
     }
 }
 
-function authenticateUser(usuario) {
-    console.log('✅ Usuario autenticado:', usuario);
+function authenticateUser(usuario, role) {
+    console.log('✅ Usuario autenticado:', usuario, 'Rol:', role);
 }
 
 function isAuthenticated() {
-    return sessionStorage.getItem('camarero_authenticated') === 'true';
+    return sessionStorage.getItem('staff_authenticated') === 'true';
 }
 
 function showError(message) {
@@ -99,7 +101,7 @@ function togglePasswordVisibility() {
 
 // Auto-fill recordarme
 document.addEventListener('DOMContentLoaded', () => {
-    const savedUser = localStorage.getItem('camarero_user');
+    const savedUser = localStorage.getItem('staff_user');
     if (savedUser) {
         usuarioInput.value = savedUser;
         rememberCheckbox.checked = true;
@@ -108,15 +110,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Redirigir si ya está autenticado
     if (isAuthenticated()) {
-        window.location.href = 'mapa.html';
+        const role = sessionStorage.getItem('staff_role');
+        if (role === 'camarero') {
+            window.location.href = 'dashboard-camarero.html';
+        } else if (role === 'gerente') {
+            window.location.href = 'dashboard-gerente.html';
+        } else if (role === 'dueno') {
+            window.location.href = 'dashboard-dueno.html';
+        }
     }
 });
 
 // Logout cuando cierre la pestaña/navegador
 window.addEventListener('beforeunload', () => {
-    // Mantener sesión si está en mapa.html
-    if (!window.location.href.includes('mapa.html')) {
-        sessionStorage.removeItem('camarero_authenticated');
-        sessionStorage.removeItem('camarero_user');
+    if (!window.location.href.includes('dashboard')) {
+        sessionStorage.removeItem('staff_authenticated');
+        sessionStorage.removeItem('staff_user');
+        sessionStorage.removeItem('staff_role');
+        sessionStorage.removeItem('staff_name');
     }
 });
