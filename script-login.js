@@ -28,7 +28,7 @@ function handleLogin(e) {
     const usuario = usuarioInput.value.trim();
     const password = passwordInput.value;
 
-    console.log('Intentando login:', usuario, password);
+    console.log('🔐 Intentando login:', usuario);
 
     // Validar campos
     if (!usuario || !password) {
@@ -38,45 +38,47 @@ function handleLogin(e) {
 
     // Verificar credenciales
     const user = VALID_USERS[usuario];
+    console.log('Usuario encontrado:', !!user);
 
     if (user && user.password === password) {
         const userRole = user.role;
         const userName = user.nombre;
 
-        console.log('Login exitoso:', usuario, 'Rol:', userRole);
+        console.log('✅ Login exitoso:', usuario, '| Rol:', userRole);
 
-        // Guardar sesión PRIMERO
+        // Guardar sesión
         if (rememberCheckbox.checked) {
             localStorage.setItem('staff_user', usuario);
+            console.log('Guardado en localStorage');
         }
 
+        // Guardar en sessionStorage
         sessionStorage.setItem('staff_authenticated', 'true');
         sessionStorage.setItem('staff_user', usuario);
         sessionStorage.setItem('staff_role', userRole);
         sessionStorage.setItem('staff_name', userName);
+        console.log('Sesión guardada en sessionStorage');
 
-        showSuccess('✅ ¡Bienvenido!');
+        showSuccess('✅ ¡Entrando!');
 
         // Determinar URL según rol
-        let redirectUrl = 'login-camareros.html';
+        let redirectUrl = '';
 
         if (userRole === 'camarero') {
-            redirectUrl = 'dashboard-camarero.html';
+            redirectUrl = '/app-restaurante/dashboard-camarero.html';
         } else if (userRole === 'gerente') {
-            redirectUrl = 'dashboard-gerente.html';
+            redirectUrl = '/app-restaurante/dashboard-gerente.html';
         } else if (userRole === 'dueno') {
-            redirectUrl = 'dashboard-dueno.html';
+            redirectUrl = '/app-restaurante/dashboard-dueno.html';
         }
 
-        console.log('Redirigiendo a:', redirectUrl);
+        console.log('📍 Redirigiendo a:', redirectUrl);
 
-        // Redirigir INMEDIATAMENTE
-        setTimeout(() => {
-            window.location.href = redirectUrl;
-        }, 300);
+        // Redirigir SIN delay
+        window.location.href = redirectUrl;
 
     } else {
-        console.log('Credenciales inválidas');
+        console.log('❌ Credenciales inválidas');
         showError('Usuario o contraseña incorrectos');
         passwordInput.value = '';
     }
@@ -85,7 +87,6 @@ function handleLogin(e) {
 function showError(message) {
     loginMessage.textContent = '❌ ' + message;
     loginMessage.className = 'login-message error';
-    console.log('Error:', message);
 
     setTimeout(() => {
         loginMessage.textContent = '';
@@ -96,7 +97,6 @@ function showError(message) {
 function showSuccess(message) {
     loginMessage.textContent = message;
     loginMessage.className = 'login-message success';
-    console.log('Éxito:', message);
 }
 
 function togglePasswordVisibility() {
@@ -107,7 +107,7 @@ function togglePasswordVisibility() {
 
 // Auto-fill recordarme
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Cargado - Login');
+    console.log('📄 Página de Login cargada');
 
     const savedUser = localStorage.getItem('staff_user');
     if (savedUser) {
@@ -118,29 +118,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Redirigir si ya está autenticado
     const isAuthenticated = sessionStorage.getItem('staff_authenticated') === 'true';
-    if (isAuthenticated) {
-        const role = sessionStorage.getItem('staff_role');
-        console.log('Ya autenticado con rol:', role);
+    const user = sessionStorage.getItem('staff_user');
 
-        let redirectUrl = 'login-camareros.html';
+    console.log('Verificando sesión existente - Autenticado:', isAuthenticated, 'Usuario:', user);
+
+    if (isAuthenticated && user) {
+        const role = sessionStorage.getItem('staff_role');
+        console.log('✅ Sesión activa con rol:', role);
+
+        let redirectUrl = '';
         if (role === 'camarero') {
-            redirectUrl = 'dashboard-camarero.html';
+            redirectUrl = '/app-restaurante/dashboard-camarero.html';
         } else if (role === 'gerente') {
-            redirectUrl = 'dashboard-gerente.html';
+            redirectUrl = '/app-restaurante/dashboard-gerente.html';
         } else if (role === 'dueno') {
-            redirectUrl = 'dashboard-dueno.html';
+            redirectUrl = '/app-restaurante/dashboard-dueno.html';
         }
 
-        window.location.href = redirectUrl;
+        if (redirectUrl) {
+            console.log('Redirigiendo a:', redirectUrl);
+            window.location.href = redirectUrl;
+        }
     }
 });
 
-// Logout cuando cierre la pestaña/navegador
+// Logout cuando cierre la pestaña
 window.addEventListener('beforeunload', () => {
     if (!window.location.href.includes('dashboard')) {
-        sessionStorage.removeItem('staff_authenticated');
-        sessionStorage.removeItem('staff_user');
-        sessionStorage.removeItem('staff_role');
-        sessionStorage.removeItem('staff_name');
+        sessionStorage.clear();
     }
 });
