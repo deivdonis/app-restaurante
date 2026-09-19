@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Restaurante - Mesa Digital</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="restaurant-app">
+            <div class="header">
+                <h1 class="mesa-title">Mesa <span id="mesaNumber">05</span></h1>
+            </div>
+
+            <div class="content">
+                <button class="action-btn" id="verCartaBtn">
+                    <span class="btn-icon">📋</span>
+                    VER CARTA
+                </button>
+
+                <button class="action-btn" id="llamarCamareroBtn">
+                    <span class="btn-icon">🔔</span>
+                    LLAMAR AL CAMARERO
+                </button>
+
+                <button class="action-btn" id="pedirCuentaBtn">
+                    <span class="btn-icon">💳</span>
+                    PEDIR LA CUENTA
+                </button>
+
+                <div class="petition-section">
+                    <textarea
+                        id="petitionInput"
+                        class="petition-input"
+                        placeholder="Dictar o escribir petición...">
+                    </textarea>
+                </div>
+
+                <div class="voice-button-container">
+                    <button class="voice-btn" id="voiceBtn">
+                        <span class="microphone-icon">🎤</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+    </div>
+
+    <!-- Modal para ver carta -->
+    <div id="cartaModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Carta del Restaurante</h2>
+            <div class="menu-section">
+                <h3>Platos Principales</h3>
+                <ul>
+                    <li>Filete a la Pimienta - €18.99</li>
+                    <li>Salmón a la Mantequilla - €16.99</li>
+                    <li>Pechuga de Pollo Rellena - €14.99</li>
+                </ul>
+            </div>
+            <div class="menu-section">
+                <h3>Entrantes</h3>
+                <ul>
+                    <li>Tabla de Quesos y Jamón - €12.99</li>
+                    <li>Camarones al Ajillo - €10.99</li>
+                    <li>Tabla de Embutidos - €9.99</li>
+                </ul>
+            </div>
+            <div class="menu-section">
+                <h3>Bebidas</h3>
+                <ul>
+                    <li>Vino Tinto - €8.99</li>
+                    <li>Vino Blanco - €7.99</li>
+                    <li>Agua - €2.99</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
