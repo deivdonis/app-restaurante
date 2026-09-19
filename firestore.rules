@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// Reglas mínimas para la demo: el cliente solo puede crear peticiones y el
+// personal puede leerlas. Endurécelas cuando el login sea real (Firebase Auth).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Peticiones de los clientes: cualquiera crea, nadie borra desde el cliente
+    match /peticiones/{peticion} {
+      allow create: if request.resource.data.keys().hasAll(['mesa', 'texto', 'timestamp'])
+                    && request.resource.data.texto is string
+                    && request.resource.data.texto.size() < 500;
+      allow read, update: if true;
+      allow delete: if false;
+    }
+
+    // Dispositivos de los camareros (para el push)
+    match /tokens_camareros/{camarero} {
+      allow read, write: if true;
+    }
+
+    // Estado de las mesas
+    match /mesas/{mesa} {
+      allow read, write: if true;
+    }
+  }
+}

@@ -41,6 +41,43 @@ de camarero y exige sesión con rol `camarero`.
 > ⚠️ La autenticación es de **demostración**: usuarios y contraseñas están en `auth.js`,
 > que se descarga en el navegador. Para producción hay que validar en un servidor.
 
+## 🔔 Avisos para los camareros
+
+La app de camareros es una **PWA instalable** (`manifest.json` + `sw.js`): desde el móvil,
+"Añadir a pantalla de inicio" y queda como una app más. Los avisos funcionan en dos niveles
+y la app elige solo el que esté disponible:
+
+**Nivel 1 — local (funciona ya, sin configurar nada).** El botón *🔔 Activar avisos* del panel
+pide permiso al navegador. A partir de ahí, cada petición nueva en una mesa del camarero
+genera una notificación del sistema, agrupada si llegan varias a la vez. Requiere `https`
+—en GitHub Pages lo hay— y que la app esté abierta o minimizada.
+
+**Nivel 2 — push real (necesita las claves de Firebase).** Al rellenar `firebase-config.js`,
+el móvil se registra en Firebase Cloud Messaging y recibe los avisos **aunque la app esté
+cerrada**, vengan del dispositivo que vengan.
+
+| Archivo | Para qué |
+|---|---|
+| `manifest.json`, `icon-*.png` | App instalable |
+| `sw.js` | Caché offline, recepción de push, abrir la mesa al tocar el aviso |
+| `notificaciones.js` | Permisos, avisos y vigilancia de peticiones nuevas |
+| `sync.js` | Comparte las peticiones entre dispositivos vía Firestore |
+| `firebase-config.js` | **Las claves van aquí** (ver comentarios del archivo) |
+| `firebase-messaging-sw.js` | Avisos con la app cerrada |
+| `functions/index.js` | Cloud Function que envía el push al crearse una petición |
+| `firestore.rules` | Reglas mínimas de acceso a los datos |
+
+### Para activar el push real
+
+1. Crear un proyecto en [Firebase](https://console.firebase.google.com) y añadirle una app web.
+2. Copiar los valores de la configuración en `firebase-config.js` (los seis campos + la clave
+   VAPID de *Cloud Messaging → Web Push certificates*).
+3. Activar **Firestore** y publicar `firestore.rules`.
+4. Desplegar la función: `firebase deploy --only functions`.
+
+Sin el paso 4 no hay push con la app cerrada: **el navegador no puede mandar una notificación
+a otro dispositivo por su cuenta**, hace falta algo en el servidor que la envíe.
+
 ## 🚀 Cómo Usar
 
 1. Accede a la aplicación en tu navegador

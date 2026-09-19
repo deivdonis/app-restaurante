@@ -67,6 +67,34 @@ body {
     color: var(--text-dim);
 }
 
+.staff-notif {
+    background: rgba(94, 208, 138, 0.14);
+    border: 1px solid rgba(94, 208, 138, 0.45);
+    color: var(--free);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.staff-notif:hover:not(:disabled) {
+    background: rgba(94, 208, 138, 0.24);
+}
+
+.staff-notif.activo {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.staff-notif.bloqueado {
+    background: rgba(255, 123, 123, 0.12);
+    border-color: rgba(255, 123, 123, 0.4);
+    color: var(--busy);
+}
+
 .staff-logout {
     background: rgba(255, 123, 123, 0.12);
     border: 1px solid rgba(255, 123, 123, 0.4);

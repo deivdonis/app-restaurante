@@ -85,6 +85,39 @@ body {
     transform: translateY(-2px);
 }
 
+/* Botón de avisos */
+.notif-btn {
+    padding: 12px 20px;
+    border: 1px solid rgba(76, 175, 80, 0.5);
+    background: rgba(76, 175, 80, 0.15);
+    color: #7fd18a;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.notif-btn:hover:not(:disabled) {
+    background: rgba(76, 175, 80, 0.28);
+    transform: translateY(-2px);
+}
+
+.notif-btn.activo {
+    border-color: rgba(76, 175, 80, 0.7);
+    background: rgba(76, 175, 80, 0.22);
+    color: #8fe09a;
+    cursor: default;
+    opacity: 0.9;
+}
+
+.notif-btn.bloqueado {
+    border-color: rgba(255, 107, 107, 0.5);
+    background: rgba(255, 107, 107, 0.12);
+    color: #ff6b6b;
+}
+
 .logout-btn {
     background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
     color: white;

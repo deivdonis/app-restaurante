@@ -8,6 +8,7 @@ const messagesList = document.getElementById('messagesList');
 const clearMessagesBtn = document.getElementById('clearMessagesBtn');
 const camareroNombre = document.getElementById('camareroNombre');
 const logoutBtn = document.getElementById('logoutBtn');
+const notifBtn = document.getElementById('notifBtn');
 
 // Estado
 let camareroActual = '';
@@ -154,6 +155,25 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+/** Mesas asignadas a este camarero, que son las que generan avisos. */
+function misMesas() {
+    const asignadas = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
+    return Object.keys(asignadas).filter(mesa => asignadas[mesa] === camareroActual);
+}
+
+function pintarBotonAvisos() {
+    const estado = Notificaciones.permiso;
+
+    if (estado === 'granted') {
+        notifBtn.textContent = '🔔 Avisos activos';
+        notifBtn.classList.add('activo');
+        notifBtn.disabled = true;
+    } else if (estado === 'denied' || estado === 'no-soportado') {
+        notifBtn.textContent = '🔕 Sin avisos';
+        notifBtn.classList.add('bloqueado');
+    }
+}
+
 // Event Listeners
 clearMessagesBtn.addEventListener('click', () => {
     const todosLosMensajes = JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
@@ -179,6 +199,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     camareroActual = user.username;
     camareroNombre.textContent = user.name;
+
+    // Avisos de las mesas asignadas a este camarero
+    notifBtn.addEventListener('click', async () => {
+        const resultado = await Notificaciones.pedirPermiso();
+        if (resultado === 'denied') {
+            showConfirmation('❌ Avisos bloqueados en el navegador');
+        } else if (resultado === 'no-soportado') {
+            showConfirmation('❌ Este navegador no admite avisos');
+        } else if (resultado === 'granted') {
+            showConfirmation('✅ Avisos activados');
+        }
+        pintarBotonAvisos();
+    });
+
+    Notificaciones.init(misMesas).then(() => {
+        pintarBotonAvisos();
+        Notificaciones.vigilar(5000);
+    });
+
+    // Peticiones compartidas entre dispositivos (si hay Firebase configurado)
+    Sync.escuchar();
+    window.addEventListener('peticiones-actualizadas', () => {
+        generarMesas();
+        cargarMensajesDeMesasAsignadas();
+        Notificaciones.revisar();
+    });
 
     generarMesas();
     cargarMensajesDeMesasAsignadas();

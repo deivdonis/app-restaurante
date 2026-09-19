@@ -6,7 +6,12 @@
     <meta name="theme-color" content="#12100e">
     <title>Mapa de Mesas - Personal</title>
     <link rel="stylesheet" href="styles-mapa.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <script src="auth.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="notificaciones.js"></script>
+    <script src="sync.js"></script>
     <script>
         // Solo camareros: sin sesión va al login, otro rol va a su propio panel
         Auth.requireRole('camarero');
@@ -16,7 +21,7 @@
     <!-- Barra de personal (solo camareros autenticados) -->
     <header class="staff-bar">
         <a href="dashboard-camarero.html" class="staff-back">‹ Dashboard</a>
-        <span class="staff-tag">🔒 Zona de personal</span>
+        <button class="staff-notif" id="notifBtn" type="button">🔔 Avisos</button>
         <button class="staff-logout" id="logoutBtn" type="button">Cerrar sesión</button>
     </header>
 

@@ -95,6 +95,13 @@ function enviarPeticion() {
 }
 
 function guardarMensaje(mesa, texto) {
+    // Sync guarda en este dispositivo y, si hay Firebase configurado, avisa
+    // además al móvil del camarero aunque tenga la app cerrada.
+    if (typeof Sync !== 'undefined') {
+        Sync.enviarPeticion(mesa, texto);
+        return;
+    }
+
     const mensajes = JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
 
     if (!mensajes[mesa]) {

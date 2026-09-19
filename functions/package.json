@@ -1,0 +1,13 @@
+{
+  "name": "app-restaurante-functions",
+  "description": "Avisos push para los camareros",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.0"
+  },
+  "private": true
+}

@@ -13,6 +13,7 @@ const fichaModal = document.getElementById('fichaModal');
 const cambiarModal = document.getElementById('cambiarModal');
 const filterBtns = document.querySelectorAll('.filter-btn');
 const closeButtons = document.querySelectorAll('.close');
+const notifBtn = document.getElementById('notifBtn');
 
 // Estado
 let camareroActual = null;
@@ -61,6 +62,26 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fichaLimpiarBtn').addEventListener('click', () => limpiarMensajesDeMesa(mesaFicha));
     document.getElementById('fichaCerrarBtn').addEventListener('click', cerrarFicha);
 
+    // Peticiones compartidas entre dispositivos (si hay Firebase configurado)
+    Sync.escuchar();
+    window.addEventListener('peticiones-actualizadas', () => {
+        generarMesas();
+        cargarMensajes();
+        if (mesaFicha !== null && fichaModal.style.display === 'block') pintarFicha(mesaFicha);
+        Notificaciones.revisar();
+    });
+
+    // Avisos: vigilan las mesas de este camarero
+    notifBtn.addEventListener('click', activarAvisos);
+    Notificaciones.init(misMesas).then(() => {
+        pintarBotonAvisos();
+        Notificaciones.vigilar(5000);
+    });
+
+    // Si el aviso trae mesa (?mesa=7 o al tocar la notificación), abrir su ficha
+    const mesaPedida = new URLSearchParams(location.search).get('mesa');
+    if (mesaPedida) abrirFicha(Number(mesaPedida));
+
     // Inicializar
     generarMesas();
     cargarMensajes();
@@ -74,6 +95,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 5000);
 });
+
+// --- Avisos ---
+
+/** Mesas de este camarero; si no tiene ninguna asignada, vigila todas. */
+function misMesas() {
+    const asignadas = leerMesasAsignadas();
+    return Object.keys(asignadas).filter(mesa => asignadas[mesa] === camareroActual);
+}
+
+async function activarAvisos() {
+    const resultado = await Notificaciones.pedirPermiso();
+
+    if (resultado === 'no-soportado') {
+        mostrarNotificacion('⚠️ Este navegador no admite avisos (hace falta https)');
+    } else if (resultado === 'denied') {
+        mostrarNotificacion('⚠️ Avisos bloqueados: actívalos en los ajustes del navegador');
+    } else if (resultado === 'granted') {
+        mostrarNotificacion('🔔 Avisos activados');
+    }
+
+    pintarBotonAvisos();
+}
+
+function pintarBotonAvisos() {
+    const estado = Notificaciones.permiso;
+
+    if (estado === 'granted') {
+        const conPush = typeof firebaseConfigurado === 'function' && firebaseConfigurado();
+        notifBtn.textContent = conPush ? '🔔 Avisos push activos' : '🔔 Avisos activos';
+        notifBtn.classList.add('activo');
+        notifBtn.disabled = true;
+        notifBtn.title = conPush
+            ? 'Recibes las peticiones aunque cierres la app'
+            : 'Avisos en este dispositivo. Para recibirlos con la app cerrada, configura Firebase.';
+    } else if (estado === 'denied') {
+        notifBtn.textContent = '🔕 Avisos bloqueados';
+        notifBtn.classList.add('bloqueado');
+        notifBtn.title = 'Permite las notificaciones en los ajustes del navegador para este sitio';
+    } else if (estado === 'no-soportado') {
+        notifBtn.textContent = '🔕 Avisos no disponibles';
+        notifBtn.classList.add('bloqueado');
+        notifBtn.disabled = true;
+        notifBtn.title = 'Los avisos necesitan https y un navegador compatible';
+    } else {
+        notifBtn.textContent = '🔔 Activar avisos';
+    }
+}
 
 // --- Utilidades de almacenamiento ---
 const leerMesasActivas = () => JSON.parse(localStorage.getItem('mesas_activas') || '{}');
