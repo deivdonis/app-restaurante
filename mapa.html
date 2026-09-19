@@ -8,13 +8,32 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Mapa de Mesas</h1>
-            <p class="subtitle">Selecciona tu mesa</p>
-        </div>
+        <div class="main-content">
+            <div class="mapa-section">
+                <div class="header">
+                    <h1>Mapa de Mesas</h1>
+                    <p class="subtitle">Haz clic para asignar/liberar</p>
+                    <div class="camarero-info">
+                        <span>👨‍💼 Camarero: <strong id="camareroNombre">Cargando...</strong></span>
+                    </div>
+                </div>
 
-        <div class="mesas-grid" id="mesasGrid">
-            <!-- Las mesas se generarán con JavaScript -->
+                <div class="mesas-grid" id="mesasGrid">
+                    <!-- Las mesas se generarán con JavaScript -->
+                </div>
+            </div>
+
+            <!-- Panel de Mensajes -->
+            <div class="messages-panel">
+                <div class="messages-header">
+                    <h2>📬 Mensajes</h2>
+                    <button class="clear-messages-btn" id="clearMessagesBtn">Limpiar</button>
+                </div>
+
+                <div class="messages-list" id="messagesList">
+                    <p class="no-messages">No hay mensajes</p>
+                </div>
+            </div>
         </div>
     </div>
 

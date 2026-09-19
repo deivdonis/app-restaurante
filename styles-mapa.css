@@ -13,9 +13,18 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    width: 100%;
     margin: 0 auto;
     padding: 20px;
+    padding-bottom: 100px;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .header {
@@ -33,6 +42,21 @@ body {
     color: #aaa;
     font-size: 14px;
     letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.camarero-info {
+    background: rgba(255, 140, 66, 0.1);
+    border: 1px solid rgba(255, 140, 66, 0.3);
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.camarero-info strong {
+    color: #ff8c42;
 }
 
 /* Mesas Grid */
@@ -74,6 +98,12 @@ body {
     border-color: #4caf50;
     background: rgba(76, 175, 80, 0.1);
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+}
+
+.mesa-item.assigned {
+    border-color: #2196f3;
+    background: rgba(33, 150, 243, 0.1);
+    box-shadow: 0 0 15px rgba(33, 150, 243, 0.4);
 }
 
 .mesa-icon {
@@ -239,8 +269,130 @@ body {
     border-bottom: none;
 }
 
+/* Messages Panel */
+.messages-panel {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+    border-radius: 12px;
+    border: 1px solid #444;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    max-height: 600px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.messages-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #444;
+}
+
+.messages-header h2 {
+    font-size: 18px;
+    color: #ff8c42;
+}
+
+.clear-messages-btn {
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid rgba(255, 107, 107, 0.5);
+    color: #ff6b6b;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clear-messages-btn:hover {
+    background: rgba(255, 107, 107, 0.3);
+}
+
+.messages-list {
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.messages-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-list::-webkit-scrollbar-track {
+    background: rgba(100, 100, 100, 0.1);
+    border-radius: 10px;
+}
+
+.messages-list::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+}
+
+.messages-list::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+.no-messages {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    padding: 20px 10px;
+}
+
+.message-item {
+    background: rgba(60, 60, 60, 0.8);
+    border-left: 3px solid #ff8c42;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.message-item.unread {
+    background: rgba(255, 140, 66, 0.1);
+    border-left-color: #ff8c42;
+}
+
+.message-mesa {
+    font-weight: 700;
+    color: #ff8c42;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.message-mesa span:last-child {
+    font-size: 11px;
+    font-weight: 400;
+    color: #888;
+}
+
+.message-text {
+    color: #aaa;
+    word-wrap: break-word;
+}
+
+.message-time {
+    font-size: 10px;
+    color: #666;
+    margin-top: 8px;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .messages-panel {
+        max-height: 300px;
+    }
     .container {
         padding: 15px;
     }

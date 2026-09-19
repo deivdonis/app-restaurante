@@ -53,15 +53,35 @@ function closeCarta() {
 }
 
 function callWaiter() {
+    const mesaActual = mesaNumber.textContent;
+    guardarMensaje(mesaActual, '🔔 Solicitud: Llamar al camarero');
     showStatus('¡Camarero! Se le necesita en la mesa ' + mesaNumber.textContent, 'success');
     vibrate();
     animateButton(llamarCamareroBtn);
 }
 
 function requestBill() {
+    const mesaActual = mesaNumber.textContent;
+    guardarMensaje(mesaActual, '💳 Solicitud: Pedir la cuenta');
     showStatus('Se ha enviado la solicitud de la cuenta...', 'success');
     vibrate([100, 50, 100]);
     animateButton(pedirCuentaBtn);
+}
+
+function guardarMensaje(mesa, texto) {
+    const mensajes = JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
+
+    if (!mensajes[mesa]) {
+        mensajes[mesa] = [];
+    }
+
+    mensajes[mesa].push({
+        texto: texto,
+        timestamp: Date.now(),
+        leido: false
+    });
+
+    localStorage.setItem('mensajes_clientes', JSON.stringify(mensajes));
 }
 
 function toggleVoice() {
@@ -92,7 +112,15 @@ function startListening() {
             transcript += event.results[i][0].transcript;
         }
         petitionInput.value += (petitionInput.value ? ' ' : '') + transcript;
-        showStatus('Texto agregado: "' + transcript + '"', 'success');
+
+        // Guardar mensaje automáticamente después de voz
+        if (petitionInput.value.trim()) {
+            guardarMensaje(mesaNumber.textContent, '🎤 ' + petitionInput.value);
+            petitionInput.value = '';
+            showStatus('✅ Petición enviada', 'success');
+        } else {
+            showStatus('Texto agregado: "' + transcript + '"', 'success');
+        }
     };
 
     recognition.onerror = (event) => {

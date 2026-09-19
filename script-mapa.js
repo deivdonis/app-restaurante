@@ -1,6 +1,6 @@
 // Configuración de mesas
 const TOTAL_MESAS = 20;
-const MESAS_OCUPADAS = [3, 7, 12, 15]; // Mesas ocupadas de ejemplo
+const MESAS_OCUPADAS = [3, 7, 12, 15];
 
 // DOM Elements
 const mesasGrid = document.getElementById('mesasGrid');
@@ -8,10 +8,18 @@ const cartaModal = document.getElementById('cartaModal');
 const closeBtn = document.querySelector('.close');
 const navCarta = document.getElementById('navCarta');
 const navItems = document.querySelectorAll('.nav-item');
+const messagesList = document.getElementById('messagesList');
+const clearMessagesBtn = document.getElementById('clearMessagesBtn');
+const camareroNombre = document.getElementById('camareroNombre');
+
+// Estado
+let camareroActual = '';
+let mesasAsignadas = [];
 
 // Generar mesas
 function generarMesas() {
     mesasGrid.innerHTML = '';
+    const mesasAsignadasJson = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
 
     for (let i = 1; i <= TOTAL_MESAS; i++) {
         const mesaDiv = document.createElement('div');
@@ -19,19 +27,28 @@ function generarMesas() {
         mesaDiv.dataset.mesa = i;
 
         const isOccupied = MESAS_OCUPADAS.includes(i);
+        const asignadaA = mesasAsignadasJson[i];
+
         if (isOccupied) {
             mesaDiv.classList.add('occupied');
         }
 
+        if (asignadaA === camareroActual) {
+            mesaDiv.classList.add('assigned');
+        }
+
         const currentMesa = localStorage.getItem('mesaNumber');
-        if (currentMesa == i) {
+        if (currentMesa == i && !camareroActual) {
             mesaDiv.classList.add('selected');
         }
 
         mesaDiv.innerHTML = `
             <span class="mesa-icon">🪑</span>
             <span class="mesa-number">${i}</span>
-            <span class="mesa-status">${isOccupied ? 'Ocupada' : 'Libre'}</span>
+            <span class="mesa-status">${
+                asignadaA ? `A: ${asignadaA.substring(0, 3)}` :
+                isOccupied ? 'Ocupada' : 'Libre'
+            }</span>
         `;
 
         mesaDiv.addEventListener('click', () => selectMesa(i, isOccupied));
@@ -40,38 +57,55 @@ function generarMesas() {
 }
 
 function selectMesa(number, isOccupied) {
-    if (isOccupied) {
-        alert('❌ Esta mesa está ocupada');
-        return;
+    const mesaElement = document.querySelector(`[data-mesa="${number}"]`);
+    const mesasAsignadasJson = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
+
+    if (camareroActual) {
+        // Camarero: asignar/liberar mesa
+        const estaAsignada = mesasAsignadasJson[number] === camareroActual;
+
+        if (estaAsignada) {
+            delete mesasAsignadasJson[number];
+            localStorage.setItem('mesas_asignadas', JSON.stringify(mesasAsignadasJson));
+            mesaElement.classList.remove('assigned');
+            showConfirmation(`✅ Mesa ${number} liberada`);
+        } else if (!mesasAsignadasJson[number]) {
+            mesasAsignadasJson[number] = camareroActual;
+            localStorage.setItem('mesas_asignadas', JSON.stringify(mesasAsignadasJson));
+            mesaElement.classList.add('assigned');
+            showConfirmation(`✅ Mesa ${number} asignada`);
+        } else {
+            showConfirmation(`❌ Mesa ${number} ya está asignada a ${mesasAsignadasJson[number]}`);
+            return;
+        }
+
+        generarMesas();
+        cargarMensajesDeMesasAsignadas();
+    } else {
+        // Cliente: seleccionar mesa
+        if (isOccupied) {
+            alert('❌ Esta mesa está ocupada');
+            return;
+        }
+
+        document.querySelectorAll('.mesa-item').forEach(mesa => {
+            mesa.classList.remove('selected');
+        });
+        mesaElement.classList.add('selected');
+
+        localStorage.setItem('mesaNumber', number);
+        showConfirmation(`✅ Mesa ${number} seleccionada`);
     }
-
-    // Actualizar selección visual
-    document.querySelectorAll('.mesa-item').forEach(mesa => {
-        mesa.classList.remove('selected');
-    });
-    document.querySelector(`[data-mesa="${number}"]`).classList.add('selected');
-
-    // Guardar en localStorage
-    localStorage.setItem('mesaNumber', number);
-
-    // Actualizar índice.html
-    if (window.mesaNumber) {
-        window.mesaNumber.textContent = number;
-    }
-
-    // Mostrar confirmación
-    showConfirmation(`✅ Mesa ${number} seleccionada`);
 }
 
 function showConfirmation(message) {
-    // Crear notificación temporal
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background: #4caf50;
+        background: ${message.includes('✅') ? '#4caf50' : '#ff6b6b'};
         color: white;
         padding: 15px 25px;
         border-radius: 8px;
@@ -88,40 +122,125 @@ function showConfirmation(message) {
     }, 2000);
 }
 
-// Modal de carta
-function openCarta() {
-    cartaModal.style.display = 'block';
+// Cargar mensajes de mesas asignadas
+function cargarMensajesDeMesasAsignadas() {
+    const todosLosMensajes = JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
+    const mesasAsignadasJson = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
+
+    // Obtener mesas asignadas al camarero actual
+    const misMesas = Object.keys(mesasAsignadasJson).filter(mesa => mesasAsignadasJson[mesa] === camareroActual);
+
+    const mensajesFiltrados = [];
+
+    misMesas.forEach(mesa => {
+        if (todosLosMensajes[mesa]) {
+            todosLosMensajes[mesa].forEach(msg => {
+                mensajesFiltrados.push({
+                    mesa,
+                    ...msg
+                });
+            });
+        }
+    });
+
+    // Ordenar por timestamp descendente
+    mensajesFiltrados.sort((a, b) => b.timestamp - a.timestamp);
+
+    // Mostrar mensajes
+    if (mensajesFiltrados.length === 0) {
+        messagesList.innerHTML = '<p class="no-messages">No hay mensajes en tus mesas</p>';
+    } else {
+        messagesList.innerHTML = mensajesFiltrados.map(msg => `
+            <div class="message-item ${!msg.leido ? 'unread' : ''}">
+                <div class="message-mesa">
+                    <span>Mesa ${msg.mesa}</span>
+                    <span>${new Date(msg.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div class="message-text">${escapeHtml(msg.texto)}</div>
+                <div class="message-time">Cliente</div>
+            </div>
+        `).join('');
+
+        // Marcar como leídos
+        misMesas.forEach(mesa => {
+            if (todosLosMensajes[mesa]) {
+                todosLosMensajes[mesa].forEach(msg => msg.leido = true);
+            }
+        });
+        localStorage.setItem('mensajes_clientes', JSON.stringify(todosLosMensajes));
+    }
 }
 
-function closeCarta() {
-    cartaModal.style.display = 'none';
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Event Listeners
+clearMessagesBtn.addEventListener('click', () => {
+    const todosLosMensajes = JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
+    const mesasAsignadasJson = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
+    const misMesas = Object.keys(mesasAsignadasJson).filter(mesa => mesasAsignadasJson[mesa] === camareroActual);
+
+    misMesas.forEach(mesa => {
+        delete todosLosMensajes[mesa];
+    });
+
+    localStorage.setItem('mensajes_clientes', JSON.stringify(todosLosMensajes));
+    cargarMensajesDeMesasAsignadas();
+    showConfirmation('✅ Mensajes limpiados');
+});
+
 navCarta.addEventListener('click', (e) => {
     e.preventDefault();
-    openCarta();
+    cartaModal.style.display = 'block';
     updateActiveNav('navCarta');
 });
 
-closeBtn.addEventListener('click', closeCarta);
+closeBtn.addEventListener('click', () => {
+    cartaModal.style.display = 'none';
+});
 
 window.addEventListener('click', (e) => {
     if (e.target === cartaModal) {
-        closeCarta();
+        cartaModal.style.display = 'none';
     }
 });
 
-// Actualizar nav activo
 function updateActiveNav(id) {
-    navItems.forEach(item => item.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    if (navItems) {
+        navItems.forEach(item => item.classList.remove('active'));
+        const activeItem = document.getElementById(id);
+        if (activeItem) {
+            activeItem.classList.add('active');
+        }
+    }
 }
 
-// Mantener activo el mapa
+// Inicializar
 document.addEventListener('DOMContentLoaded', () => {
+    // Verificar autenticación
+    const isAuthenticated = sessionStorage.getItem('camarero_authenticated') === 'true';
+    const usuarioAutenticado = sessionStorage.getItem('camarero_user');
+
+    if (!isAuthenticated) {
+        window.location.href = 'login-camareros.html';
+        return;
+    }
+
+    camareroActual = usuarioAutenticado;
+    camareroNombre.textContent = usuarioAutenticado.toUpperCase();
+
     generarMesas();
     updateActiveNav('navMapa');
+    cargarMensajesDeMesasAsignadas();
+
+    // Refrescar cada 5 segundos
+    setInterval(() => {
+        generarMesas();
+        cargarMensajesDeMesasAsignadas();
+    }, 5000);
 
     // Agregar estilos de animación
     const style = document.createElement('style');
@@ -139,9 +258,3 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
 });
-
-// Refrescar mesas cada 30 segundos (simulación)
-setInterval(() => {
-    // En una app real, aquí harías un fetch a la API
-    generarMesas();
-}, 30000);
