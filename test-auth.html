@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Auth</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            font-family: Arial;
+            padding: 20px;
+        }
+        .box {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background: #ff8c42;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test de Autenticación</h1>
+
+    <div class="box">
+        <h2>SessionStorage</h2>
+        <p id="sessionInfo">Cargando...</p>
+        <button onclick="setTestSession()">Crear sesión de prueba</button>
+        <button onclick="clearSession()">Limpiar sesión</button>
+    </div>
+
+    <div class="box">
+        <h2>Redirección Manual</h2>
+        <button onclick="goToDashboardCamarero()">Ir a Dashboard Camarero</button>
+        <button onclick="goToDashboardGerente()">Ir a Dashboard Gerente</button>
+        <button onclick="goToDashboardDueno()">Ir a Dashboard Dueño</button>
+    </div>
+
+    <div class="box">
+        <h2>Rutas</h2>
+        <p>Rutas probadas:</p>
+        <ul>
+            <li>dashboard-camarero.html</li>
+            <li>./dashboard-camarero.html</li>
+            <li>/app-restaurante/dashboard-camarero.html</li>
+        </ul>
+    </div>
+
+    <script>
+        function updateInfo() {
+            const info = {
+                authenticated: sessionStorage.getItem('staff_authenticated'),
+                user: sessionStorage.getItem('staff_user'),
+                role: sessionStorage.getItem('staff_role'),
+                name: sessionStorage.getItem('staff_name')
+            };
+            document.getElementById('sessionInfo').innerHTML = '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
+        }
+
+        function setTestSession() {
+            sessionStorage.setItem('staff_authenticated', 'true');
+            sessionStorage.setItem('staff_user', 'camarero1');
+            sessionStorage.setItem('staff_role', 'camarero');
+            sessionStorage.setItem('staff_name', 'Camarero 1');
+            updateInfo();
+            alert('✅ Sesión de prueba creada');
+        }
+
+        function clearSession() {
+            sessionStorage.clear();
+            updateInfo();
+            alert('✅ Sesión limpiada');
+        }
+
+        function goToDashboardCamarero() {
+            console.log('Intentando ir a dashboard-camarero.html');
+            window.location.href = 'dashboard-camarero.html';
+        }
+
+        function goToDashboardGerente() {
+            console.log('Intentando ir a dashboard-gerente.html');
+            window.location.href = 'dashboard-gerente.html';
+        }
+
+        function goToDashboardDueno() {
+            console.log('Intentando ir a dashboard-dueno.html');
+            window.location.href = 'dashboard-dueno.html';
+        }
+
+        updateInfo();
+    </script>
+</body>
+</html>

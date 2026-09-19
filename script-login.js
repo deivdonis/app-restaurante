@@ -38,7 +38,6 @@ function handleLogin(e) {
 
     // Verificar credenciales
     const user = VALID_USERS[usuario];
-    console.log('Usuario encontrado:', !!user);
 
     if (user && user.password === password) {
         const userRole = user.role;
@@ -46,35 +45,34 @@ function handleLogin(e) {
 
         console.log('✅ Login exitoso:', usuario, '| Rol:', userRole);
 
-        // Guardar sesión
-        if (rememberCheckbox.checked) {
-            localStorage.setItem('staff_user', usuario);
-            console.log('Guardado en localStorage');
-        }
-
-        // Guardar en sessionStorage
+        // Guardar en sessionStorage PRIMERO
         sessionStorage.setItem('staff_authenticated', 'true');
         sessionStorage.setItem('staff_user', usuario);
         sessionStorage.setItem('staff_role', userRole);
         sessionStorage.setItem('staff_name', userName);
-        console.log('Sesión guardada en sessionStorage');
 
+        // Guardar en localStorage si lo pide
+        if (rememberCheckbox.checked) {
+            localStorage.setItem('staff_user', usuario);
+        }
+
+        console.log('✅ Sesión guardada');
         showSuccess('✅ ¡Entrando!');
 
         // Determinar URL según rol
-        let redirectUrl = '';
+        let redirectUrl = 'dashboard-camarero.html';
 
         if (userRole === 'camarero') {
-            redirectUrl = '/app-restaurante/dashboard-camarero.html';
+            redirectUrl = 'dashboard-camarero.html';
         } else if (userRole === 'gerente') {
-            redirectUrl = '/app-restaurante/dashboard-gerente.html';
+            redirectUrl = 'dashboard-gerente.html';
         } else if (userRole === 'dueno') {
-            redirectUrl = '/app-restaurante/dashboard-dueno.html';
+            redirectUrl = 'dashboard-dueno.html';
         }
 
         console.log('📍 Redirigiendo a:', redirectUrl);
 
-        // Redirigir SIN delay
+        // Redirigir inmediatamente
         window.location.href = redirectUrl;
 
     } else {
@@ -105,46 +103,38 @@ function togglePasswordVisibility() {
     togglePasswordBtn.textContent = isPassword ? '🙈' : '👁️';
 }
 
-// Auto-fill recordarme
+// Auto-fill y redirección si ya hay sesión
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 Página de Login cargada');
+    console.log('📄 Página Login cargada');
 
+    // Verificar sesión existente
+    const isAuthenticated = sessionStorage.getItem('staff_authenticated') === 'true';
+    const user = sessionStorage.getItem('staff_user');
+
+    console.log('Sesión existente - Autenticado:', isAuthenticated, 'Usuario:', user);
+
+    if (isAuthenticated && user) {
+        const role = sessionStorage.getItem('staff_role');
+        console.log('✅ Sesión activa, redirigiendo');
+
+        let redirectUrl = 'dashboard-camarero.html';
+
+        if (role === 'camarero') {
+            redirectUrl = 'dashboard-camarero.html';
+        } else if (role === 'gerente') {
+            redirectUrl = 'dashboard-gerente.html';
+        } else if (role === 'dueno') {
+            redirectUrl = 'dashboard-dueno.html';
+        }
+
+        window.location.href = redirectUrl;
+    }
+
+    // Auto-fill usuario guardado
     const savedUser = localStorage.getItem('staff_user');
     if (savedUser) {
         usuarioInput.value = savedUser;
         rememberCheckbox.checked = true;
         passwordInput.focus();
-    }
-
-    // Redirigir si ya está autenticado
-    const isAuthenticated = sessionStorage.getItem('staff_authenticated') === 'true';
-    const user = sessionStorage.getItem('staff_user');
-
-    console.log('Verificando sesión existente - Autenticado:', isAuthenticated, 'Usuario:', user);
-
-    if (isAuthenticated && user) {
-        const role = sessionStorage.getItem('staff_role');
-        console.log('✅ Sesión activa con rol:', role);
-
-        let redirectUrl = '';
-        if (role === 'camarero') {
-            redirectUrl = '/app-restaurante/dashboard-camarero.html';
-        } else if (role === 'gerente') {
-            redirectUrl = '/app-restaurante/dashboard-gerente.html';
-        } else if (role === 'dueno') {
-            redirectUrl = '/app-restaurante/dashboard-dueno.html';
-        }
-
-        if (redirectUrl) {
-            console.log('Redirigiendo a:', redirectUrl);
-            window.location.href = redirectUrl;
-        }
-    }
-});
-
-// Logout cuando cierre la pestaña
-window.addEventListener('beforeunload', () => {
-    if (!window.location.href.includes('dashboard')) {
-        sessionStorage.clear();
     }
 });
