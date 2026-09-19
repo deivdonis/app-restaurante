@@ -3,11 +3,13 @@ const verCartaBtn = document.getElementById('verCartaBtn');
 const llamarCamareroBtn = document.getElementById('llamarCamareroBtn');
 const pedirCuentaBtn = document.getElementById('pedirCuentaBtn');
 const voiceBtn = document.getElementById('voiceBtn');
+const enviarPeticionBtn = document.getElementById('enviarPeticionBtn');
 const petitionInput = document.getElementById('petitionInput');
 const cartaModal = document.getElementById('cartaModal');
 const closeBtn = document.querySelector('.close');
 const statusMessage = document.getElementById('statusMessage');
 const mesaNumber = document.getElementById('mesaNumber');
+const mesaEditBtn = document.getElementById('mesaEditBtn');
 const navCarta = document.getElementById('navCarta');
 const navItems = document.querySelectorAll('.nav-item');
 
@@ -28,9 +30,13 @@ verCartaBtn.addEventListener('click', openCarta);
 llamarCamareroBtn.addEventListener('click', callWaiter);
 pedirCuentaBtn.addEventListener('click', requestBill);
 voiceBtn.addEventListener('click', toggleVoice);
+enviarPeticionBtn.addEventListener('click', enviarPeticion);
 closeBtn.addEventListener('click', closeCarta);
 window.addEventListener('click', (e) => {
     if (e.target === cartaModal) closeCarta();
+});
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeCarta();
 });
 
 // Navigation events
@@ -45,27 +51,41 @@ if (navCarta) {
 // Functions
 function openCarta() {
     cartaModal.style.display = 'block';
-    showStatus('Abriendo carta...', 'info');
 }
 
 function closeCarta() {
     cartaModal.style.display = 'none';
+    updateActiveNav('navHome');
 }
 
 function callWaiter() {
-    const mesaActual = mesaNumber.textContent;
-    guardarMensaje(mesaActual, '🔔 Solicitud: Llamar al camarero');
-    showStatus('¡Camarero! Se le necesita en la mesa ' + mesaNumber.textContent, 'success');
+    guardarMensaje(mesaNumber.textContent, '🔔 Solicitud: Llamar al camarero');
+    showStatus('🔔 Aviso enviado, el camarero viene a la mesa ' + mesaNumber.textContent, 'success');
     vibrate();
     animateButton(llamarCamareroBtn);
 }
 
 function requestBill() {
-    const mesaActual = mesaNumber.textContent;
-    guardarMensaje(mesaActual, '💳 Solicitud: Pedir la cuenta');
-    showStatus('Se ha enviado la solicitud de la cuenta...', 'success');
+    guardarMensaje(mesaNumber.textContent, '💳 Solicitud: Pedir la cuenta');
+    showStatus('💳 Se ha enviado la solicitud de la cuenta', 'success');
     vibrate([100, 50, 100]);
     animateButton(pedirCuentaBtn);
+}
+
+function enviarPeticion() {
+    const texto = petitionInput.value.trim();
+
+    if (!texto) {
+        showStatus('Escribe o dicta tu petición primero', 'error');
+        petitionInput.focus();
+        return;
+    }
+
+    guardarMensaje(mesaNumber.textContent, '✏️ ' + texto);
+    petitionInput.value = '';
+    showStatus('✅ Petición enviada al camarero', 'success');
+    vibrate();
+    animateButton(enviarPeticionBtn);
 }
 
 function guardarMensaje(mesa, texto) {
@@ -100,7 +120,7 @@ function toggleVoice() {
 function startListening() {
     isListening = true;
     voiceBtn.classList.add('listening');
-    showStatus('Escuchando...', 'info');
+    showStatus('🎤 Escuchando...', 'info');
 
     recognition.onstart = () => {
         petitionInput.placeholder = 'Hablando...';
@@ -112,15 +132,7 @@ function startListening() {
             transcript += event.results[i][0].transcript;
         }
         petitionInput.value += (petitionInput.value ? ' ' : '') + transcript;
-
-        // Guardar mensaje automáticamente después de voz
-        if (petitionInput.value.trim()) {
-            guardarMensaje(mesaNumber.textContent, '🎤 ' + petitionInput.value);
-            petitionInput.value = '';
-            showStatus('✅ Petición enviada', 'success');
-        } else {
-            showStatus('Texto agregado: "' + transcript + '"', 'success');
-        }
+        showStatus('Revisa el texto y pulsa "Enviar petición"', 'success');
     };
 
     recognition.onerror = (event) => {
@@ -130,7 +142,7 @@ function startListening() {
     recognition.onend = () => {
         isListening = false;
         voiceBtn.classList.remove('listening');
-        petitionInput.placeholder = 'Dictar o escribir petición...';
+        petitionInput.placeholder = 'Escribe o dicta tu petición...';
     };
 
     recognition.start();
@@ -181,6 +193,14 @@ function getMesa() {
     }
 }
 
+function cambiarMesa() {
+    const newNumber = prompt('Número de mesa:', mesaNumber.textContent);
+    if (newNumber && newNumber.trim()) {
+        setMesa(newNumber.trim());
+        showStatus('Mesa actualizada a la ' + newNumber.trim(), 'success');
+    }
+}
+
 // Update active navigation
 function updateActiveNav(id) {
     if (navItems) {
@@ -197,11 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
     getMesa();
     updateActiveNav('navHome');
 
-    // Permitir cambiar número de mesa con doble click
-    mesaNumber.addEventListener('dblclick', () => {
-        const newNumber = prompt('Número de mesa:', mesaNumber.textContent);
-        if (newNumber && newNumber.trim()) {
-            setMesa(newNumber.trim());
-        }
-    });
+    mesaEditBtn.addEventListener('click', cambiarMesa);
+    mesaNumber.addEventListener('dblclick', cambiarMesa);
 });

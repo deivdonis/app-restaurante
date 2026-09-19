@@ -4,13 +4,10 @@ const MESAS_OCUPADAS = [3, 7, 12, 15];
 
 // DOM Elements
 const mesasGrid = document.getElementById('mesasGrid');
-const cartaModal = document.getElementById('cartaModal');
-const closeBtn = document.querySelector('.close');
-const navCarta = document.getElementById('navCarta');
-const navItems = document.querySelectorAll('.nav-item');
 const messagesList = document.getElementById('messagesList');
 const clearMessagesBtn = document.getElementById('clearMessagesBtn');
 const camareroNombre = document.getElementById('camareroNombre');
+const logoutBtn = document.getElementById('logoutBtn');
 
 // Estado
 let camareroActual = '';
@@ -37,65 +34,45 @@ function generarMesas() {
             mesaDiv.classList.add('assigned');
         }
 
-        const currentMesa = localStorage.getItem('mesaNumber');
-        if (currentMesa == i && !camareroActual) {
-            mesaDiv.classList.add('selected');
-        }
-
         mesaDiv.innerHTML = `
             <span class="mesa-icon">🪑</span>
             <span class="mesa-number">${i}</span>
             <span class="mesa-status">${
-                asignadaA ? `A: ${asignadaA.substring(0, 3)}` :
+                asignadaA === camareroActual ? 'Mía' :
+                asignadaA ? Auth.nombreDe(asignadaA) :
                 isOccupied ? 'Ocupada' : 'Libre'
             }</span>
         `;
 
-        mesaDiv.addEventListener('click', () => selectMesa(i, isOccupied));
+        mesaDiv.addEventListener('click', () => selectMesa(i));
         mesasGrid.appendChild(mesaDiv);
     }
 }
 
-function selectMesa(number, isOccupied) {
+function selectMesa(number) {
     const mesaElement = document.querySelector(`[data-mesa="${number}"]`);
     const mesasAsignadasJson = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
 
-    if (camareroActual) {
-        // Camarero: asignar/liberar mesa
-        const estaAsignada = mesasAsignadasJson[number] === camareroActual;
+    // Solo camareros: asignar/liberar mesa
+    const estaAsignada = mesasAsignadasJson[number] === camareroActual;
 
-        if (estaAsignada) {
-            delete mesasAsignadasJson[number];
-            localStorage.setItem('mesas_asignadas', JSON.stringify(mesasAsignadasJson));
-            mesaElement.classList.remove('assigned');
-            showConfirmation(`✅ Mesa ${number} liberada`);
-        } else if (!mesasAsignadasJson[number]) {
-            mesasAsignadasJson[number] = camareroActual;
-            localStorage.setItem('mesas_asignadas', JSON.stringify(mesasAsignadasJson));
-            mesaElement.classList.add('assigned');
-            showConfirmation(`✅ Mesa ${number} asignada`);
-        } else {
-            showConfirmation(`❌ Mesa ${number} ya está asignada a ${mesasAsignadasJson[number]}`);
-            return;
-        }
-
-        generarMesas();
-        cargarMensajesDeMesasAsignadas();
+    if (estaAsignada) {
+        delete mesasAsignadasJson[number];
+        localStorage.setItem('mesas_asignadas', JSON.stringify(mesasAsignadasJson));
+        mesaElement.classList.remove('assigned');
+        showConfirmation(`✅ Mesa ${number} liberada`);
+    } else if (!mesasAsignadasJson[number]) {
+        mesasAsignadasJson[number] = camareroActual;
+        localStorage.setItem('mesas_asignadas', JSON.stringify(mesasAsignadasJson));
+        mesaElement.classList.add('assigned');
+        showConfirmation(`✅ Mesa ${number} asignada`);
     } else {
-        // Cliente: seleccionar mesa
-        if (isOccupied) {
-            alert('❌ Esta mesa está ocupada');
-            return;
-        }
-
-        document.querySelectorAll('.mesa-item').forEach(mesa => {
-            mesa.classList.remove('selected');
-        });
-        mesaElement.classList.add('selected');
-
-        localStorage.setItem('mesaNumber', number);
-        showConfirmation(`✅ Mesa ${number} seleccionada`);
+        showConfirmation(`❌ Mesa ${number} ya está asignada a ${Auth.nombreDe(mesasAsignadasJson[number])}`);
+        return;
     }
+
+    generarMesas();
+    cargarMensajesDeMesasAsignadas();
 }
 
 function showConfirmation(message) {
@@ -192,48 +169,18 @@ clearMessagesBtn.addEventListener('click', () => {
     showConfirmation('✅ Mensajes limpiados');
 });
 
-navCarta.addEventListener('click', (e) => {
-    e.preventDefault();
-    cartaModal.style.display = 'block';
-    updateActiveNav('navCarta');
-});
-
-closeBtn.addEventListener('click', () => {
-    cartaModal.style.display = 'none';
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target === cartaModal) {
-        cartaModal.style.display = 'none';
-    }
-});
-
-function updateActiveNav(id) {
-    if (navItems) {
-        navItems.forEach(item => item.classList.remove('active'));
-        const activeItem = document.getElementById(id);
-        if (activeItem) {
-            activeItem.classList.add('active');
-        }
-    }
-}
+logoutBtn.addEventListener('click', () => Auth.logout());
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
-    // Verificar autenticación
-    const isAuthenticated = sessionStorage.getItem('camarero_authenticated') === 'true';
-    const usuarioAutenticado = sessionStorage.getItem('camarero_user');
+    // Zona de personal: la página ya está protegida en el <head>
+    const user = Auth.requireRole("camarero");
+    if (!user) return;
 
-    if (!isAuthenticated) {
-        window.location.href = 'login-camareros.html';
-        return;
-    }
-
-    camareroActual = usuarioAutenticado;
-    camareroNombre.textContent = usuarioAutenticado.toUpperCase();
+    camareroActual = user.username;
+    camareroNombre.textContent = user.name;
 
     generarMesas();
-    updateActiveNav('navMapa');
     cargarMensajesDeMesasAsignadas();
 
     // Refrescar cada 5 segundos

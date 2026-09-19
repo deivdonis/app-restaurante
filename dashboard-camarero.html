@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Camarero - App Restaurante</title>
     <link rel="stylesheet" href="styles-dashboard-camarero.css">
+    <script src="auth.js"></script>
+    <script>
+        // Solo camareros: sin sesión va al login, otro rol va a su propio panel
+        Auth.requireRole('camarero');
+    </script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -12,9 +17,15 @@
         <div class="dashboard-header">
             <div class="header-left">
                 <h1>🏪 Control de Mesas</h1>
-                <p class="user-info">👨‍💼 <strong id="camareroNombre">Dashboard Camarero</strong></p>
+                <p class="user-info">
+                    👨‍💼 <strong id="camareroNombre">Cargando...</strong>
+                    <span class="role-badge">Camarero</span>
+                </p>
             </div>
-            <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+            <div class="header-actions">
+                <a href="mapa.html" class="map-link">🗺️ Mapa de mesas</a>
+                <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+            </div>
         </div>
 
         <!-- Main Content -->

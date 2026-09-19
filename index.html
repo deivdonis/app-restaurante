@@ -3,47 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Restaurante - Mesa Digital</title>
+    <meta name="theme-color" content="#12100e">
+    <title>Mesa Digital - App Restaurante</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <div class="restaurant-app">
-            <div class="version-badge">v1.3</div>
-            <div class="header">
-                <h1 class="mesa-title">Mesa <span id="mesaNumber">10</span></h1>
-            </div>
+            <div class="version-badge">v1.4</div>
 
-            <div class="content">
+            <header class="header">
+                <div class="brand">
+                    <span class="brand-mark">🍽️</span>
+                    <span class="brand-name">Mesa Digital</span>
+                </div>
+                <h1 class="mesa-title">Mesa <span id="mesaNumber">10</span></h1>
+                <button class="mesa-edit" id="mesaEditBtn" type="button">
+                    ✏️ Cambiar mesa
+                </button>
+                <p class="welcome">¿En qué podemos ayudarte?</p>
+            </header>
+
+            <main class="content">
                 <button class="action-btn" id="verCartaBtn">
                     <span class="btn-icon">📋</span>
-                    VER CARTA
+                    <span class="btn-text">
+                        <span class="btn-title">Ver carta</span>
+                        <span class="btn-sub">Platos, entrantes y bebidas</span>
+                    </span>
+                    <span class="btn-arrow">›</span>
                 </button>
 
-                <button class="action-btn" id="llamarCamareroBtn">
+                <button class="action-btn primary" id="llamarCamareroBtn">
                     <span class="btn-icon">🔔</span>
-                    LLAMAR AL CAMARERO
+                    <span class="btn-text">
+                        <span class="btn-title">Llamar al camarero</span>
+                        <span class="btn-sub">Te atendemos enseguida</span>
+                    </span>
+                    <span class="btn-arrow">›</span>
                 </button>
 
                 <button class="action-btn" id="pedirCuentaBtn">
                     <span class="btn-icon">💳</span>
-                    PEDIR LA CUENTA
+                    <span class="btn-text">
+                        <span class="btn-title">Pedir la cuenta</span>
+                        <span class="btn-sub">Cuando quieras marcharte</span>
+                    </span>
+                    <span class="btn-arrow">›</span>
                 </button>
 
-                <div class="petition-section">
-                    <textarea
-                        id="petitionInput"
-                        class="petition-input"
-                        placeholder="Dictar o escribir petición...">
-                    </textarea>
-                </div>
-
-                <div class="voice-button-container">
-                    <button class="voice-btn" id="voiceBtn">
-                        <span class="microphone-icon">🎤</span>
-                    </button>
-                </div>
-            </div>
+                <section class="petition-section">
+                    <label class="petition-label" for="petitionInput">Petición especial</label>
+                    <div class="petition-box">
+                        <textarea
+                            id="petitionInput"
+                            class="petition-input"
+                            rows="3"
+                            placeholder="Escribe o dicta tu petición..."></textarea>
+                        <div class="petition-actions">
+                            <button class="voice-btn" id="voiceBtn" type="button" aria-label="Dictar petición">
+                                <span class="microphone-icon">🎤</span>
+                            </button>
+                            <button class="send-btn" id="enviarPeticionBtn" type="button">
+                                Enviar petición
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
 
             <div class="status-message" id="statusMessage"></div>
         </div>
@@ -57,25 +84,25 @@
             <div class="menu-section">
                 <h3>Platos Principales</h3>
                 <ul>
-                    <li>Filete a la Pimienta - €18.99</li>
-                    <li>Salmón a la Mantequilla - €16.99</li>
-                    <li>Pechuga de Pollo Rellena - €14.99</li>
+                    <li><span>Filete a la Pimienta</span><span class="price">€18.99</span></li>
+                    <li><span>Salmón a la Mantequilla</span><span class="price">€16.99</span></li>
+                    <li><span>Pechuga de Pollo Rellena</span><span class="price">€14.99</span></li>
                 </ul>
             </div>
             <div class="menu-section">
                 <h3>Entrantes</h3>
                 <ul>
-                    <li>Tabla de Quesos y Jamón - €12.99</li>
-                    <li>Camarones al Ajillo - €10.99</li>
-                    <li>Tabla de Embutidos - €9.99</li>
+                    <li><span>Tabla de Quesos y Jamón</span><span class="price">€12.99</span></li>
+                    <li><span>Camarones al Ajillo</span><span class="price">€10.99</span></li>
+                    <li><span>Tabla de Embutidos</span><span class="price">€9.99</span></li>
                 </ul>
             </div>
             <div class="menu-section">
                 <h3>Bebidas</h3>
                 <ul>
-                    <li>Vino Tinto - €8.99</li>
-                    <li>Vino Blanco - €7.99</li>
-                    <li>Agua - €2.99</li>
+                    <li><span>Vino Tinto</span><span class="price">€8.99</span></li>
+                    <li><span>Vino Blanco</span><span class="price">€7.99</span></li>
+                    <li><span>Agua</span><span class="price">€2.99</span></li>
                 </ul>
             </div>
         </div>
@@ -83,11 +110,6 @@
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <a href="mapa.html" class="nav-item" id="navMapa">
-            <span class="nav-icon">🗺️</span>
-            <span class="nav-label">Mapa</span>
-        </a>
-
         <a href="#" class="nav-item" id="navCarta">
             <span class="nav-icon">📋</span>
             <span class="nav-label">Carta</span>
@@ -100,12 +122,7 @@
 
         <a href="login-camareros.html" class="nav-item" id="navCamareros">
             <span class="nav-icon">👨‍💼</span>
-            <span class="nav-label">Camareros</span>
-        </a>
-
-        <a href="#" class="nav-item" id="navOpciones">
-            <span class="nav-icon">⚙️</span>
-            <span class="nav-label">Opciones</span>
+            <span class="nav-label">Personal</span>
         </a>
     </nav>
 

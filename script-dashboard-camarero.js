@@ -14,17 +14,18 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 const closeButtons = document.querySelectorAll('.close');
 
 // Estado
-let camareroActual = 'camarero1';
+let camareroActual = null;
 let filtroActual = 'all';
 let mesaTrasladoActual = null;
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Dashboard Camarero Cargado');
+    // La página ya está protegida en el <head>; aquí tomamos la sesión real
+    const user = Auth.requireRole("camarero");
+    if (!user) return;
 
-    // Sin autenticación - acceso directo
-    camareroActual = 'camarero1';
-    camareroNombre.textContent = 'Dashboard Camarero';
+    camareroActual = user.username;
+    camareroNombre.textContent = user.name;
 
     // Event Listeners
     logoutBtn.addEventListener('click', logout);
@@ -86,7 +87,7 @@ function generarMesas() {
                 ${estaActiva ? '🟢 ACTIVA' : '⚫ INACTIVA'}
             </div>
             <div class="mesa-camarero">
-                ${asignadaA ? `👤 ${asignadaA}` : '📌 Sin asignar'}
+                ${asignadaA ? `👤 ${Auth.nombreDe(asignadaA)}` : "📌 Sin asignar"}
             </div>
             <div class="mesa-acciones">
                 <button class="mesa-btn" onclick="toggleMesa(${i})" title="${estaActiva ? 'Desactivar' : 'Activar'}">
@@ -121,16 +122,13 @@ function abrirTrasladar(mesa) {
     const camarerosList = document.getElementById('camarerosList');
     camarerosList.innerHTML = '';
 
-    const camareros = ['camarero1', 'camarero2', 'camarero3', 'camarero4', 'camarero5'];
-
-    camareros.forEach(camarero => {
-        if (camarero !== camareroActual) {
-            const div = document.createElement('div');
-            div.className = 'camarero-option';
-            div.textContent = camarero.toUpperCase();
-            div.onclick = () => trasladarMesa(mesa, camarero);
-            camarerosList.appendChild(div);
-        }
+    // Los demás camareros, según la lista del sistema de acceso
+    Auth.otrosCamareros(camareroActual).forEach(camarero => {
+        const div = document.createElement('div');
+        div.className = 'camarero-option';
+        div.textContent = Auth.nombreDe(camarero);
+        div.onclick = () => trasladarMesa(mesa, camarero);
+        camarerosList.appendChild(div);
     });
 
     trasladarModal.style.display = 'block';
@@ -144,7 +142,7 @@ function trasladarMesa(mesa, camarero) {
 
     trasladarModal.style.display = 'none';
     generarMesas();
-    mostrarNotificacion(`✅ Mesa ${mesa} trasladada a ${camarero}`);
+    mostrarNotificacion(`✅ Mesa ${mesa} trasladada a ${Auth.nombreDe(camarero)}`);
 }
 
 function cerrarTrasladar() {
@@ -158,7 +156,7 @@ function verDetalles(mesa) {
     const mensajes = JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
 
     const estaActiva = mesasActivas[mesa];
-    const asignadaA = mesasAsignadas[mesa] || 'Sin asignar';
+    const asignadaA = mesasAsignadas[mesa] ? Auth.nombreDe(mesasAsignadas[mesa]) : 'Sin asignar';
     const mensajesMesa = mensajes[mesa] || [];
 
     const detallesInfo = document.getElementById('detallesInfo');
@@ -264,10 +262,7 @@ function mostrarNotificacion(mensaje) {
 }
 
 function logout() {
-    console.log('Logout - Limpiando sesión');
-    sessionStorage.clear();
-    localStorage.removeItem('staff_user');
-    window.location.href = 'login-camareros.html';
+    Auth.logout();
 }
 
 // Estilos de animación

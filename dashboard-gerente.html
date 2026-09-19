@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Gerente - App Restaurante</title>
     <link rel="stylesheet" href="styles-dashboard-camarero.css">
+    <script src="auth.js"></script>
+    <script>
+        // Solo gerencia: sin sesión va al login, otro rol va a su propio panel
+        Auth.requireRole('gerente');
+    </script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -32,31 +37,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('Dashboard Gerente Cargado');
+            const user = Auth.requireRole('gerente');
+            if (!user) return;
 
-            // Verificar autenticación
-            const isAuth = sessionStorage.getItem('staff_authenticated') === 'true';
-            const role = sessionStorage.getItem('staff_role');
-            const name = sessionStorage.getItem('staff_name');
-
-            console.log('Autenticado:', isAuth, 'Rol:', role, 'Nombre:', name);
-
-            if (!isAuth || role !== 'gerente') {
-                console.log('No autorizado, redirigiendo a login');
-                window.location.href = './login-camareros.html';
-                return;
-            }
-
-            if (name) {
-                document.getElementById('camareroNombre').textContent = name;
-            }
-
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                console.log('Logout');
-                sessionStorage.clear();
-                localStorage.removeItem('staff_user');
-                window.location.href = './login-camareros.html';
-            });
+            document.getElementById('camareroNombre').textContent = user.name;
+            document.getElementById('logoutBtn').addEventListener('click', () => Auth.logout());
         });
     </script>
 </body>
