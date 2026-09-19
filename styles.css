@@ -17,6 +17,21 @@ body {
 .container {
     width: 100%;
     max-width: 400px;
+    position: relative;
+}
+
+.version-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #ff8c42 0%, #ff7020 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
 }
 
 .restaurant-app {
