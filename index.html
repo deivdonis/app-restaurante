@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <div class="restaurant-app">
-            <div class="version-badge">v1.4</div>
+            <div class="version-badge">v1.5</div>
 
             <header class="header">
                 <div class="brand">
@@ -18,9 +18,6 @@
                     <span class="brand-name">Mesa Digital</span>
                 </div>
                 <h1 class="mesa-title">Mesa <span id="mesaNumber">10</span></h1>
-                <button class="mesa-edit" id="mesaEditBtn" type="button">
-                    ✏️ Cambiar mesa
-                </button>
                 <p class="welcome">¿En qué podemos ayudarte?</p>
             </header>
 
@@ -59,16 +56,19 @@
                             id="petitionInput"
                             class="petition-input"
                             rows="3"
-                            placeholder="Escribe o dicta tu petición..."></textarea>
-                        <div class="petition-actions">
-                            <button class="voice-btn" id="voiceBtn" type="button" aria-label="Dictar petición">
-                                <span class="microphone-icon">🎤</span>
-                            </button>
-                            <button class="send-btn" id="enviarPeticionBtn" type="button">
-                                Enviar petición
-                            </button>
-                        </div>
+                            placeholder="Escribe aquí o pulsa el micrófono..."></textarea>
                     </div>
+
+                    <div class="voice-row">
+                        <button class="voice-btn" id="voiceBtn" type="button" aria-label="Dictar petición">
+                            <span class="microphone-icon">🎤</span>
+                        </button>
+                        <span class="voice-hint" id="voiceHint">Pulsa para dictar</span>
+                    </div>
+
+                    <button class="send-btn" id="enviarPeticionBtn" type="button">
+                        Enviar petición
+                    </button>
                 </section>
             </main>
 

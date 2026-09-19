@@ -71,13 +71,39 @@
         </div>
     </div>
 
-    <!-- Modal Detalles Mesa -->
-    <div id="detallesModal" class="modal">
+    <!-- Ficha de Mesa: se abre al tocar una mesa -->
+    <div id="fichaModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Detalles de Mesa</h2>
-            <div class="detalles-info" id="detallesInfo"></div>
-            <button class="btn-cancel" onclick="cerrarDetalles()">Cerrar</button>
+            <h2>🪑 Mesa <span id="fichaNumero">00</span></h2>
+
+            <div class="detalles-info" id="fichaInfo"></div>
+
+            <h3 class="ficha-sub">📬 Mensajes de esta mesa</h3>
+            <div class="ficha-mensajes" id="fichaMensajes"></div>
+
+            <div class="ficha-acciones">
+                <button class="ficha-btn" id="fichaToggleBtn">▶️ Activar mesa</button>
+                <button class="ficha-btn azul" id="fichaTrasladarBtn">🔄 Trasladar a otro camarero</button>
+                <button class="ficha-btn azul" id="fichaCambiarBtn">↔️ Cambiar de mesa</button>
+                <button class="ficha-btn rojo" id="fichaLimpiarBtn">🧹 Limpiar sus mensajes</button>
+            </div>
+
+            <button class="btn-cancel" id="fichaCerrarBtn">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar de Mesa (mueve el historial) -->
+    <div id="cambiarModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Cambiar de mesa</h2>
+            <p>
+                Los clientes de la mesa <strong id="cambiarOrigen">00</strong> pasan a otra mesa.
+                Se lleva consigo <strong>todo su historial de pedidos</strong>, su estado y su camarero.
+            </p>
+            <div class="mesas-destino" id="mesasDestino"></div>
+            <button class="btn-cancel" onclick="cerrarCambiar()">Cancelar</button>
         </div>
     </div>
 

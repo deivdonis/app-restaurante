@@ -9,13 +9,15 @@ const clearMessagesBtn = document.getElementById('clearMessagesBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const camareroNombre = document.getElementById('camareroNombre');
 const trasladarModal = document.getElementById('trasladarModal');
-const detallesModal = document.getElementById('detallesModal');
+const fichaModal = document.getElementById('fichaModal');
+const cambiarModal = document.getElementById('cambiarModal');
 const filterBtns = document.querySelectorAll('.filter-btn');
 const closeButtons = document.querySelectorAll('.close');
 
 // Estado
 let camareroActual = null;
 let filtroActual = 'all';
+let mesaFicha = null;        // mesa abierta en la ficha
 let mesaTrasladoActual = null;
 
 // Inicializar
@@ -52,6 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Acciones de la ficha de mesa
+    document.getElementById('fichaToggleBtn').addEventListener('click', () => toggleMesa(mesaFicha));
+    document.getElementById('fichaTrasladarBtn').addEventListener('click', () => abrirTrasladar(mesaFicha));
+    document.getElementById('fichaCambiarBtn').addEventListener('click', () => abrirCambiar(mesaFicha));
+    document.getElementById('fichaLimpiarBtn').addEventListener('click', () => limpiarMensajesDeMesa(mesaFicha));
+    document.getElementById('fichaCerrarBtn').addEventListener('click', cerrarFicha);
+
     // Inicializar
     generarMesas();
     cargarMensajes();
@@ -60,62 +69,180 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         generarMesas();
         cargarMensajes();
+        if (mesaFicha !== null && fichaModal.style.display === 'block') {
+            pintarFicha(mesaFicha);
+        }
     }, 5000);
 });
 
-// Generar Mesas
+// --- Utilidades de almacenamiento ---
+const leerMesasActivas = () => JSON.parse(localStorage.getItem('mesas_activas') || '{}');
+const leerMesasAsignadas = () => JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
+const leerMensajes = () => JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
+const guardarMesasActivas = (v) => localStorage.setItem('mesas_activas', JSON.stringify(v));
+const guardarMesasAsignadas = (v) => localStorage.setItem('mesas_asignadas', JSON.stringify(v));
+const guardarMensajes = (v) => localStorage.setItem('mensajes_clientes', JSON.stringify(v));
+
+// --- Generar Mesas ---
+// La tarjeta entera abre la ficha de la mesa; los botones viven dentro de la ficha.
 function generarMesas() {
     mesasGrid.innerHTML = '';
-    const mesasActivas = JSON.parse(localStorage.getItem('mesas_activas') || '{}');
-    const mesasAsignadas = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
+    const mesasActivas = leerMesasActivas();
+    const mesasAsignadas = leerMesasAsignadas();
+    const mensajes = leerMensajes();
 
     for (let i = 1; i <= TOTAL_MESAS; i++) {
         const estaActiva = mesasActivas[i] === true;
         const asignadaA = mesasAsignadas[i];
-        const esOcupada = MESAS_OCUPADAS.includes(i);
+        const sinLeer = (mensajes[i] || []).filter(m => !m.leido).length;
 
         // Filtrar por estado
         if (filtroActual === 'active' && !estaActiva) continue;
         if (filtroActual === 'inactive' && estaActiva) continue;
 
         const card = document.createElement('div');
-        card.className = `mesa-card ${!estaActiva ? 'inactive' : ''}`;
+        card.className = `mesa-card ${!estaActiva ? 'inactive' : ''} ${asignadaA === camareroActual ? 'mia' : ''}`;
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.title = `Ver ficha de la mesa ${i}`;
 
         card.innerHTML = `
+            ${sinLeer > 0 ? `<span class="mesa-aviso">${sinLeer}</span>` : ''}
             <div class="mesa-numero">${i}</div>
             <div class="mesa-estado ${!estaActiva ? 'inactive' : ''}">
                 ${estaActiva ? '🟢 ACTIVA' : '⚫ INACTIVA'}
             </div>
             <div class="mesa-camarero">
-                ${asignadaA ? `👤 ${Auth.nombreDe(asignadaA)}` : "📌 Sin asignar"}
+                ${asignadaA ? `👤 ${Auth.nombreDe(asignadaA)}` : '📌 Sin asignar'}
             </div>
-            <div class="mesa-acciones">
-                <button class="mesa-btn" onclick="toggleMesa(${i})" title="${estaActiva ? 'Desactivar' : 'Activar'}">
-                    ${estaActiva ? '⏹️ Desact' : '▶️ Activ'}
-                </button>
-                <button class="mesa-btn trasladar" onclick="abrirTrasladar(${i})" title="Trasladar">
-                    🔄 Trasf
-                </button>
-                <button class="mesa-btn" onclick="verDetalles(${i})" title="Detalles">
-                    ℹ️ Info
-                </button>
-            </div>
+            <div class="mesa-abrir">Ver ficha ›</div>
         `;
+
+        card.addEventListener('click', () => abrirFicha(i));
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                abrirFicha(i);
+            }
+        });
 
         mesasGrid.appendChild(card);
     }
 }
 
-// Toggle Mesa (Activar/Desactivar)
-function toggleMesa(mesa) {
-    const mesasActivas = JSON.parse(localStorage.getItem('mesas_activas') || '{}');
-    mesasActivas[mesa] = !mesasActivas[mesa];
-    localStorage.setItem('mesas_activas', JSON.stringify(mesasActivas));
-    generarMesas();
+// --- Ficha de Mesa ---
+function abrirFicha(mesa) {
+    mesaFicha = mesa;
+    pintarFicha(mesa);
+    fichaModal.style.display = 'block';
 }
 
-// Abrir Modal Trasladar
+function cerrarFicha() {
+    fichaModal.style.display = 'none';
+    mesaFicha = null;
+}
+
+function pintarFicha(mesa) {
+    const mesasActivas = leerMesasActivas();
+    const mesasAsignadas = leerMesasAsignadas();
+    const mensajes = leerMensajes();
+
+    const estaActiva = mesasActivas[mesa] === true;
+    const asignadaA = mesasAsignadas[mesa];
+    const esOcupada = MESAS_OCUPADAS.includes(Number(mesa));
+    const historial = (mensajes[mesa] || []).slice().sort((a, b) => b.timestamp - a.timestamp);
+    const sinLeer = historial.filter(m => !m.leido).length;
+    const primero = historial.length ? historial[historial.length - 1] : null;
+
+    document.getElementById('fichaNumero').textContent = mesa;
+
+    document.getElementById('fichaInfo').innerHTML = `
+        <div class="detalles-item">
+            <span class="detalles-label">Estado</span>
+            <span class="detalles-valor">${estaActiva ? '🟢 Activa' : '⚫ Inactiva'}</span>
+        </div>
+        <div class="detalles-item">
+            <span class="detalles-label">Ocupación</span>
+            <span class="detalles-valor">${esOcupada ? '🍽️ Ocupada' : '🪑 Libre'}</span>
+        </div>
+        <div class="detalles-item">
+            <span class="detalles-label">Camarero</span>
+            <span class="detalles-valor">${asignadaA ? Auth.nombreDe(asignadaA) : 'Sin asignar'}</span>
+        </div>
+        <div class="detalles-item">
+            <span class="detalles-label">Peticiones</span>
+            <span class="detalles-valor">${historial.length}${sinLeer ? ` (${sinLeer} sin leer)` : ''}</span>
+        </div>
+        <div class="detalles-item">
+            <span class="detalles-label">Primera petición</span>
+            <span class="detalles-valor">${primero ? hora(primero.timestamp) : '—'}</span>
+        </div>
+        <div class="detalles-item">
+            <span class="detalles-label">Última petición</span>
+            <span class="detalles-valor">${historial.length ? hora(historial[0].timestamp) : '—'}</span>
+        </div>
+    `;
+
+    document.getElementById('fichaMensajes').innerHTML = historial.length
+        ? historial.map(msg => `
+            <div class="message-item ${!msg.leido ? 'unread' : ''}">
+                <div class="message-mesa">
+                    <span>${!msg.leido ? '🔴 Sin leer' : 'Leído'}</span>
+                    <span>${hora(msg.timestamp)}</span>
+                </div>
+                <div class="message-texto">${escapeHtml(msg.texto)}</div>
+            </div>
+        `).join('')
+        : '<p class="no-messages">Esta mesa no ha pedido nada todavía</p>';
+
+    document.getElementById('fichaToggleBtn').textContent = estaActiva ? '⏹️ Desactivar mesa' : '▶️ Activar mesa';
+
+    // Marcar como leídos los mensajes de esta mesa
+    if (sinLeer > 0) {
+        const todos = leerMensajes();
+        (todos[mesa] || []).forEach(m => m.leido = true);
+        guardarMensajes(todos);
+    }
+}
+
+function hora(timestamp) {
+    return new Date(timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+
+// --- Acciones de la ficha ---
+function toggleMesa(mesa) {
+    if (mesa === null) return;
+    const mesasActivas = leerMesasActivas();
+    mesasActivas[mesa] = !mesasActivas[mesa];
+    guardarMesasActivas(mesasActivas);
+
+    generarMesas();
+    pintarFicha(mesa);
+    mostrarNotificacion(mesasActivas[mesa] ? `🟢 Mesa ${mesa} activada` : `⚫ Mesa ${mesa} desactivada`);
+}
+
+function limpiarMensajesDeMesa(mesa) {
+    if (mesa === null) return;
+    const mensajes = leerMensajes();
+    const cuantos = (mensajes[mesa] || []).length;
+
+    if (!cuantos) {
+        mostrarNotificacion('No hay mensajes que limpiar');
+        return;
+    }
+
+    delete mensajes[mesa];
+    guardarMensajes(mensajes);
+
+    generarMesas();
+    cargarMensajes();
+    pintarFicha(mesa);
+    mostrarNotificacion(`🧹 ${cuantos} mensaje(s) de la mesa ${mesa} eliminados`);
+}
+
+// --- Trasladar a otro camarero ---
 function abrirTrasladar(mesa) {
+    if (mesa === null) return;
     mesaTrasladoActual = mesa;
     document.getElementById('mesaTrasladar').textContent = mesa;
 
@@ -134,14 +261,14 @@ function abrirTrasladar(mesa) {
     trasladarModal.style.display = 'block';
 }
 
-// Trasladar Mesa
 function trasladarMesa(mesa, camarero) {
-    const mesasAsignadas = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
+    const mesasAsignadas = leerMesasAsignadas();
     mesasAsignadas[mesa] = camarero;
-    localStorage.setItem('mesas_asignadas', JSON.stringify(mesasAsignadas));
+    guardarMesasAsignadas(mesasAsignadas);
 
     trasladarModal.style.display = 'none';
     generarMesas();
+    if (mesaFicha !== null) pintarFicha(mesaFicha);
     mostrarNotificacion(`✅ Mesa ${mesa} trasladada a ${Auth.nombreDe(camarero)}`);
 }
 
@@ -149,58 +276,110 @@ function cerrarTrasladar() {
     trasladarModal.style.display = 'none';
 }
 
-// Ver Detalles
-function verDetalles(mesa) {
-    const mesasActivas = JSON.parse(localStorage.getItem('mesas_activas') || '{}');
-    const mesasAsignadas = JSON.parse(localStorage.getItem('mesas_asignadas') || '{}');
-    const mensajes = JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
+// --- Cambiar de mesa: los clientes se mueven y se llevan su historial ---
+function abrirCambiar(mesa) {
+    if (mesa === null) return;
+    document.getElementById('cambiarOrigen').textContent = mesa;
 
-    const estaActiva = mesasActivas[mesa];
-    const asignadaA = mesasAsignadas[mesa] ? Auth.nombreDe(mesasAsignadas[mesa]) : 'Sin asignar';
-    const mensajesMesa = mensajes[mesa] || [];
+    const mesasActivas = leerMesasActivas();
+    const mesasAsignadas = leerMesasAsignadas();
+    const mensajes = leerMensajes();
+    const destinos = document.getElementById('mesasDestino');
+    destinos.innerHTML = '';
 
-    const detallesInfo = document.getElementById('detallesInfo');
-    detallesInfo.innerHTML = `
-        <div class="detalles-item">
-            <span class="detalles-label">📍 Mesa:</span>
-            <span class="detalles-valor">${mesa}</span>
-        </div>
-        <div class="detalles-item">
-            <span class="detalles-label">🟢 Estado:</span>
-            <span class="detalles-valor">${estaActiva ? 'ACTIVA' : 'INACTIVA'}</span>
-        </div>
-        <div class="detalles-item">
-            <span class="detalles-label">👤 Asignado a:</span>
-            <span class="detalles-valor">${asignadaA}</span>
-        </div>
-        <div class="detalles-item">
-            <span class="detalles-label">📬 Mensajes:</span>
-            <span class="detalles-valor">${mensajesMesa.length}</span>
-        </div>
-        <div class="detalles-item">
-            <span class="detalles-label">🕐 Hora Apertura:</span>
-            <span class="detalles-valor">${new Date().toLocaleTimeString('es-ES')}</span>
-        </div>
-    `;
+    for (let i = 1; i <= TOTAL_MESAS; i++) {
+        if (i === Number(mesa)) continue;
 
-    detallesModal.style.display = 'block';
+        const ocupadaPorOtro = mesasAsignadas[i] && mesasAsignadas[i] !== camareroActual;
+        const tieneHistorial = (mensajes[i] || []).length > 0;
+        const activa = mesasActivas[i] === true;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `mesa-destino ${ocupadaPorOtro ? 'bloqueada' : ''}`;
+        btn.innerHTML = `
+            <span class="destino-num">${i}</span>
+            <span class="destino-info">${
+                ocupadaPorOtro ? Auth.nombreDe(mesasAsignadas[i]) :
+                tieneHistorial ? 'con pedidos' :
+                activa ? 'activa' : 'libre'
+            }</span>
+        `;
+
+        if (ocupadaPorOtro) {
+            btn.disabled = true;
+            btn.title = `La lleva ${Auth.nombreDe(mesasAsignadas[i])}`;
+        } else {
+            btn.addEventListener('click', () => moverMesa(Number(mesa), i));
+        }
+
+        destinos.appendChild(btn);
+    }
+
+    cambiarModal.style.display = 'block';
 }
 
-function cerrarDetalles() {
-    detallesModal.style.display = 'none';
+function cerrarCambiar() {
+    cambiarModal.style.display = 'none';
 }
 
-// Cargar Mensajes
+/**
+ * Mueve una mesa entera a otra: historial de pedidos, estado y camarero.
+ * Si la mesa destino ya tenía pedidos, los dos historiales se fusionan por hora.
+ */
+function moverMesa(origen, destino) {
+    const mensajes = leerMensajes();
+    const mesasActivas = leerMesasActivas();
+    const mesasAsignadas = leerMesasAsignadas();
+
+    const historialOrigen = mensajes[origen] || [];
+    const historialDestino = mensajes[destino] || [];
+
+    // Historial: se traslada completo y se ordena por hora
+    const fusionado = historialDestino
+        .concat(historialOrigen.map(m => ({ ...m, mesaOriginal: m.mesaOriginal || origen })))
+        .sort((a, b) => a.timestamp - b.timestamp);
+
+    if (fusionado.length) {
+        mensajes[destino] = fusionado;
+    }
+    delete mensajes[origen];
+    guardarMensajes(mensajes);
+
+    // Estado: el destino hereda el de origen, el origen queda libre
+    mesasActivas[destino] = mesasActivas[origen] === true;
+    delete mesasActivas[origen];
+    guardarMesasActivas(mesasActivas);
+
+    // Camarero: sigue siendo el mismo
+    if (mesasAsignadas[origen]) {
+        mesasAsignadas[destino] = mesasAsignadas[origen];
+        delete mesasAsignadas[origen];
+    }
+    guardarMesasAsignadas(mesasAsignadas);
+
+    cambiarModal.style.display = 'none';
+    generarMesas();
+    cargarMensajes();
+
+    // La ficha pasa a seguir a los clientes en su nueva mesa
+    mesaFicha = destino;
+    pintarFicha(destino);
+
+    mostrarNotificacion(
+        `✅ Mesa ${origen} → ${destino}` +
+        (historialOrigen.length ? ` con ${historialOrigen.length} petición(es)` : '')
+    );
+}
+
+// --- Mensajes (panel lateral) ---
 function cargarMensajes() {
-    const mensajes = JSON.parse(localStorage.getItem('mensajes_clientes') || '{}');
+    const mensajes = leerMensajes();
     const todosLosMensajes = [];
 
     for (const mesa in mensajes) {
         mensajes[mesa].forEach(msg => {
-            todosLosMensajes.push({
-                mesa,
-                ...msg
-            });
+            todosLosMensajes.push({ mesa, ...msg });
         });
     }
 
@@ -208,29 +387,32 @@ function cargarMensajes() {
 
     if (todosLosMensajes.length === 0) {
         messagesList.innerHTML = '<p class="no-messages">No hay mensajes</p>';
-    } else {
-        messagesList.innerHTML = todosLosMensajes.slice(0, 20).map(msg => `
-            <div class="message-item ${!msg.leido ? 'unread' : ''}">
-                <div class="message-mesa">
-                    <span>🪑 Mesa ${msg.mesa}</span>
-                    <span>${new Date(msg.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-                <div class="message-texto">${escapeHtml(msg.texto)}</div>
-                <div class="message-time">Cliente</div>
-            </div>
-        `).join('');
-
-        // Marcar como leídos
-        for (const mesa in mensajes) {
-            mensajes[mesa].forEach(msg => msg.leido = true);
-        }
-        localStorage.setItem('mensajes_clientes', JSON.stringify(mensajes));
+        return;
     }
+
+    messagesList.innerHTML = todosLosMensajes.slice(0, 20).map(msg => `
+        <div class="message-item ${!msg.leido ? 'unread' : ''}" data-mesa="${msg.mesa}">
+            <div class="message-mesa">
+                <span>🪑 Mesa ${msg.mesa}</span>
+                <span>${hora(msg.timestamp)}</span>
+            </div>
+            <div class="message-texto">${escapeHtml(msg.texto)}</div>
+            <div class="message-time">Cliente${msg.mesaOriginal ? ` · venía de la mesa ${msg.mesaOriginal}` : ''}</div>
+        </div>
+    `).join('');
+
+    // Tocar un mensaje abre la ficha de su mesa
+    messagesList.querySelectorAll('.message-item').forEach(item => {
+        item.style.cursor = 'pointer';
+        item.addEventListener('click', () => abrirFicha(Number(item.dataset.mesa)));
+    });
 }
 
 function limpiarMensajes() {
-    localStorage.setItem('mensajes_clientes', JSON.stringify({}));
+    guardarMensajes({});
     cargarMensajes();
+    generarMesas();
+    if (mesaFicha !== null) pintarFicha(mesaFicha);
     mostrarNotificacion('✅ Mensajes limpiados');
 }
 

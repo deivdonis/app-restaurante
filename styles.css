@@ -117,26 +117,6 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-.mesa-edit {
-    margin-top: 10px;
-    padding: 6px 14px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    color: var(--text-dim);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    font-family: inherit;
-}
-
-.mesa-edit:hover {
-    color: var(--accent);
-    border-color: rgba(255, 140, 66, 0.45);
-}
-
 .welcome {
     margin-top: 14px;
     font-size: 13px;
@@ -276,28 +256,49 @@ body {
     color: #7d736c;
 }
 
-.petition-actions {
+/* Fila del micrófono: siempre centrada */
+.voice-row {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
+    margin: 18px 0 14px;
+}
+
+.voice-hint {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+    text-align: center;
+}
+
+.voice-row.listening .voice-hint {
+    color: var(--accent);
 }
 
 .voice-btn {
     flex-shrink: 0;
-    width: 46px;
-    height: 46px;
+    width: 62px;
+    height: 62px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
     border: none;
     color: #fff;
-    font-size: 19px;
+    font-size: 26px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 8px 20px rgba(255, 140, 66, 0.35);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.voice-btn[disabled] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: none;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .voice-btn:hover {
@@ -323,8 +324,9 @@ body {
 }
 
 .send-btn {
-    flex: 1;
-    padding: 13px 16px;
+    display: block;
+    width: 100%;
+    padding: 15px 16px;
     border: 1px solid rgba(255, 140, 66, 0.45);
     background: rgba(255, 140, 66, 0.12);
     color: var(--accent-soft);
@@ -370,7 +372,8 @@ body {
     background: rgba(8, 7, 6, 0.82);
     backdrop-filter: blur(6px);
     animation: fadeIn 0.25s ease;
-    padding: 20px;
+    /* Hueco inferior para que la barra de navegación siga visible y utilizable */
+    padding: 20px 20px 110px;
     overflow-y: auto;
 }
 
@@ -473,7 +476,8 @@ body {
     align-items: center;
     padding: 9px 6px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-    z-index: 100;
+    /* Por encima del modal: la barra nunca desaparece */
+    z-index: 1200;
 }
 
 .nav-item {

@@ -3,26 +3,29 @@ const verCartaBtn = document.getElementById('verCartaBtn');
 const llamarCamareroBtn = document.getElementById('llamarCamareroBtn');
 const pedirCuentaBtn = document.getElementById('pedirCuentaBtn');
 const voiceBtn = document.getElementById('voiceBtn');
+const voiceRow = document.querySelector('.voice-row');
+const voiceHint = document.getElementById('voiceHint');
 const enviarPeticionBtn = document.getElementById('enviarPeticionBtn');
 const petitionInput = document.getElementById('petitionInput');
 const cartaModal = document.getElementById('cartaModal');
 const closeBtn = document.querySelector('.close');
 const statusMessage = document.getElementById('statusMessage');
 const mesaNumber = document.getElementById('mesaNumber');
-const mesaEditBtn = document.getElementById('mesaEditBtn');
 const navCarta = document.getElementById('navCarta');
 const navItems = document.querySelectorAll('.nav-item');
 
 // Speech Recognition Setup
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition;
+let recognition = null;
 let isListening = false;
+let textoAntesDeDictar = '';
 
 if (SpeechRecognition) {
     recognition = new SpeechRecognition();
     recognition.lang = 'es-ES';
     recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.interimResults = true;   // para ver el texto mientras se habla
+    recognition.maxAlternatives = 1;
 }
 
 // Event Listeners
@@ -51,6 +54,7 @@ if (navCarta) {
 // Functions
 function openCarta() {
     cartaModal.style.display = 'block';
+    updateActiveNav('navCarta');
 }
 
 function closeCarta() {
@@ -81,6 +85,8 @@ function enviarPeticion() {
         return;
     }
 
+    if (isListening) stopListening();
+
     guardarMensaje(mesaNumber.textContent, '✏️ ' + texto);
     petitionInput.value = '';
     showStatus('✅ Petición enviada al camarero', 'success');
@@ -104,12 +110,9 @@ function guardarMensaje(mesa, texto) {
     localStorage.setItem('mensajes_clientes', JSON.stringify(mensajes));
 }
 
-function toggleVoice() {
-    if (!recognition) {
-        showStatus('Reconocimiento de voz no disponible en este navegador', 'error');
-        return;
-    }
+// --- Dictado ---
 
+function toggleVoice() {
     if (!isListening) {
         startListening();
     } else {
@@ -118,41 +121,76 @@ function toggleVoice() {
 }
 
 function startListening() {
-    isListening = true;
-    voiceBtn.classList.add('listening');
-    showStatus('🎤 Escuchando...', 'info');
+    // El navegador solo da acceso al micrófono en https (o en localhost)
+    if (!window.isSecureContext) {
+        showStatus('El dictado necesita una conexión segura (https)', 'error');
+        return;
+    }
 
-    recognition.onstart = () => {
-        petitionInput.placeholder = 'Hablando...';
-    };
+    textoAntesDeDictar = petitionInput.value.trim();
+    isListening = true;
+    voiceRow.classList.add('listening');
+    voiceBtn.classList.add('listening');
+    voiceHint.textContent = 'Escuchando... pulsa para parar';
 
     recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
+        let definitivo = '';
+        let provisional = '';
+
+        for (let i = 0; i < event.results.length; i++) {
+            const texto = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                definitivo += texto;
+            } else {
+                provisional += texto;
+            }
         }
-        petitionInput.value += (petitionInput.value ? ' ' : '') + transcript;
-        showStatus('Revisa el texto y pulsa "Enviar petición"', 'success');
+
+        // Se escribe en el cuadro mientras hablas, sin perder lo ya escrito
+        const partes = [textoAntesDeDictar, (definitivo + provisional).trim()].filter(Boolean);
+        petitionInput.value = partes.join(' ');
     };
 
     recognition.onerror = (event) => {
-        showStatus('Error en reconocimiento de voz: ' + event.error, 'error');
+        const mensajes = {
+            'not-allowed': 'No hay permiso para usar el micrófono. Actívalo en el navegador.',
+            'service-not-allowed': 'No hay permiso para usar el micrófono.',
+            'no-speech': 'No se escuchó nada. Inténtalo de nuevo.',
+            'audio-capture': 'No se encontró ningún micrófono.',
+            'network': 'Sin conexión para el reconocimiento de voz.',
+            'aborted': ''
+        };
+        const mensaje = mensajes[event.error];
+        if (mensaje !== '') {
+            showStatus('🎤 ' + (mensaje || 'Error de dictado: ' + event.error), 'error');
+        }
     };
 
     recognition.onend = () => {
         isListening = false;
+        voiceRow.classList.remove('listening');
         voiceBtn.classList.remove('listening');
-        petitionInput.placeholder = 'Escribe o dicta tu petición...';
+        voiceHint.textContent = 'Pulsa para dictar';
+
+        if (petitionInput.value.trim() && petitionInput.value.trim() !== textoAntesDeDictar) {
+            showStatus('Revisa el texto y pulsa "Enviar petición"', 'success');
+        }
     };
 
-    recognition.start();
+    try {
+        recognition.start();
+    } catch (e) {
+        // start() lanza error si ya estaba escuchando
+        isListening = false;
+        voiceRow.classList.remove('listening');
+        voiceBtn.classList.remove('listening');
+        voiceHint.textContent = 'Pulsa para dictar';
+    }
 }
 
 function stopListening() {
-    if (recognition) {
+    if (recognition && isListening) {
         recognition.stop();
-        isListening = false;
-        voiceBtn.classList.remove('listening');
     }
 }
 
@@ -180,24 +218,22 @@ function vibrate(pattern = 200) {
     }
 }
 
-// Local Storage para mesa
-function setMesa(number) {
-    localStorage.setItem('mesaNumber', number);
-    mesaNumber.textContent = number;
-}
+// --- Número de mesa ---
+// Lo fija el QR de la mesa (index.html?mesa=7). El cliente ya no lo cambia:
+// de trasladar una mesa a otra se encarga el camarero desde su panel.
+function cargarMesa() {
+    const desdeQR = new URLSearchParams(location.search).get('mesa');
 
-function getMesa() {
-    const saved = localStorage.getItem('mesaNumber');
-    if (saved) {
-        mesaNumber.textContent = saved;
+    if (desdeQR && desdeQR.trim()) {
+        const mesa = desdeQR.trim();
+        localStorage.setItem('mesaNumber', mesa);
+        mesaNumber.textContent = mesa;
+        return;
     }
-}
 
-function cambiarMesa() {
-    const newNumber = prompt('Número de mesa:', mesaNumber.textContent);
-    if (newNumber && newNumber.trim()) {
-        setMesa(newNumber.trim());
-        showStatus('Mesa actualizada a la ' + newNumber.trim(), 'success');
+    const guardada = localStorage.getItem('mesaNumber');
+    if (guardada) {
+        mesaNumber.textContent = guardada;
     }
 }
 
@@ -214,9 +250,13 @@ function updateActiveNav(id) {
 
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
-    getMesa();
+    cargarMesa();
     updateActiveNav('navHome');
 
-    mesaEditBtn.addEventListener('click', cambiarMesa);
-    mesaNumber.addEventListener('dblclick', cambiarMesa);
+    if (!recognition) {
+        voiceBtn.disabled = true;
+        voiceHint.textContent = 'Dictado no disponible en este navegador';
+    } else if (!window.isSecureContext) {
+        voiceHint.textContent = 'El dictado necesita https';
+    }
 });
