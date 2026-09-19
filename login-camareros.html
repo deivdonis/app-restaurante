@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Camareros - App Restaurante</title>
+    <link rel="stylesheet" href="styles-login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">👨‍💼</div>
+            <h1>Acceso Camareros</h1>
+            <p class="subtitle">Portal del personal</p>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="usuario">Usuario</label>
+                    <input
+                        type="text"
+                        id="usuario"
+                        name="usuario"
+                        placeholder="tu.usuario"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="••••••••"
+                            required
+                        >
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Recuérdame</label>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    Iniciar sesión
+                </button>
+            </form>
+
+            <div class="login-message" id="loginMessage"></div>
+
+            <div class="help-section">
+                <p>¿Problemas para acceder?</p>
+                <a href="#" class="help-link">Contacta al administrador</a>
+            </div>
+        </div>
+
+        <div class="demo-credentials">
+            <p>🔑 Credenciales de prueba:</p>
+            <p><strong>Usuario:</strong> camarero</p>
+            <p><strong>Contraseña:</strong> 1234</p>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="mapa.html" class="nav-item" id="navMapa">
+            <span class="nav-icon">🗺️</span>
+            <span class="nav-label">Mapa</span>
+        </a>
+
+        <a href="#" class="nav-item" id="navCarta">
+            <span class="nav-icon">📋</span>
+            <span class="nav-label">Carta</span>
+        </a>
+
+        <a href="index.html" class="nav-item" id="navHome">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Inicio</span>
+        </a>
+
+        <a href="login-camareros.html" class="nav-item active" id="navCamareros">
+            <span class="nav-icon">👨‍💼</span>
+            <span class="nav-label">Camareros</span>
+        </a>
+
+        <a href="#" class="nav-item" id="navOpciones">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Opciones</span>
+        </a>
+    </nav>
+
+    <script src="script-login.js"></script>
+</body>
+</html>
